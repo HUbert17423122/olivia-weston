@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reset the Vite template “boxed app” behavior */
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  max-width: none;
+  padding: 0;
+}
