@@ -8,6 +8,7 @@ import { apptRouter } from "./routes/appointments.js";
 import { pool } from "./db.js";
 
 const app = express();
+app.set("trust proxy", 1);
 
 app.use(helmet());
 app.use(express.json());
@@ -103,5 +104,6 @@ init()
     console.error("Init failed", e);
     process.exit(1);
   });
+
 
 
