@@ -19,17 +19,15 @@ const allow = (process.env.CORS_ORIGIN || "")
 
 app.use(
   cors({
-    origin: (origin, cb) => {
-      // allow requests with no origin (Render health checks, curl, etc.)
-      if (!origin) return cb(null, true);
-
-      if (allow.includes(origin)) return cb(null, true);
-
-      return cb(new Error(`CORS blocked: ${origin}`));
-    },
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: false,
   })
 );
+
+app.options("*", cors());
+
 
 // respond to preflight requests
 app.options("*", cors());
@@ -105,4 +103,5 @@ init()
     console.error("Init failed", e);
     process.exit(1);
   });
+
 
