@@ -20,7 +20,11 @@ const allow = (process.env.CORS_ORIGIN || "")
 
 app.use(
   cors({
-    origin: "*",
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true); // allow curl/health checks
+      if (allow.length === 0) return cb(null, true); // fallback if not set
+      return cb(null, allow.includes(origin));
+    },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: false,
@@ -28,6 +32,7 @@ app.use(
 );
 
 app.options("*", cors());
+
 
 
 // respond to preflight requests
@@ -104,6 +109,7 @@ init()
     console.error("Init failed", e);
     process.exit(1);
   });
+
 
 
 
