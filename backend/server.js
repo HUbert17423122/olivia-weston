@@ -12,12 +12,28 @@ const app = express();
 app.use(helmet());
 app.use(express.json());
 
+const allow = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN?.split(",").map(s => s.trim()) || true,
+    origin: (origin, cb) => {
+      // allow requests with no origin (Render health checks, curl, etc.)
+      if (!origin) return cb(null, true);
+
+      if (allow.includes(origin)) return cb(null, true);
+
+      return cb(new Error(`CORS blocked: ${origin}`));
+    },
     credentials: false,
   })
 );
+
+// respond to preflight requests
+app.options("*", cors());
+
 
 app.use(
   "/api/",
@@ -89,3 +105,4 @@ init()
     console.error("Init failed", e);
     process.exit(1);
   });
+
