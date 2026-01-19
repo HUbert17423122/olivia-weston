@@ -1909,9 +1909,12 @@ function AdminDashboardPage({ dark, t }) {
                     </td>
                     <td className="p-4 whitespace-nowrap">{m.name}</td>
                     <td className="p-4 whitespace-nowrap opacity-80">{m.email}</td>
-                    <td className="p-4 min-w-[360px]">
-                      <div className="opacity-85 whitespace-pre-wrap">{m.message}</div>
-                    </td>
+<td className="p-4 w-[520px] max-w-[520px]">
+  <div className="opacity-85 whitespace-pre-wrap break-words">
+    {m.message}
+  </div>
+</td>
+
                     <td className="p-4 whitespace-nowrap">
                       <Button
                         variant="outline"
