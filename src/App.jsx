@@ -1675,8 +1675,12 @@ function AdminDashboardPage({ dark, t }) {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const [msgErr, setMsgErr] = useState("");
+  const [msgLoading, setMsgLoading] = useState(true);
+
   const token = typeof window !== "undefined" ? localStorage.getItem("ow_admin_token") : null;
 
+  // Load appointments
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -1687,17 +1691,10 @@ function AdminDashboardPage({ dark, t }) {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data?.error || "Failed to load");
+        if (!res.ok) throw new Error(data?.error || "Failed to load appointments");
         if (alive) setItems(data.items || []);
-        const resM = await fetch(`${API_BASE}/messages`, {
-  headers: { Authorization: `Bearer ${token}` },
-});
-const dataM = await resM.json();
-if (!resM.ok) throw new Error(dataM?.error || "Failed to load messages");
-if (alive) setMessages(dataM.items || []);
-
       } catch (e) {
-        if (alive) setErr(e.message || "Failed to load");
+        if (alive) setErr(e.message || "Failed to load appointments");
       } finally {
         if (alive) setLoading(false);
       }
@@ -1706,6 +1703,31 @@ if (alive) setMessages(dataM.items || []);
       alive = false;
     };
   }, [token]);
+
+  // Load messages
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      setMsgLoading(true);
+      setMsgErr("");
+      try {
+        const resM = await fetch(`${API_BASE}/messages`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const dataM = await resM.json();
+        if (!resM.ok) throw new Error(dataM?.error || "Failed to load messages");
+        if (alive) setMessages(dataM.items || []);
+      } catch (e) {
+        if (alive) setMsgErr(e.message || "Failed to load messages");
+      } finally {
+        if (alive) setMsgLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [token]);
+
   const deleteAppt = async (id) => {
     const sure = window.confirm(t.langToggleHint === "Język" ? "Usunąć rezerwację?" : "Delete this appointment?");
     if (!sure) return;
@@ -1717,43 +1739,51 @@ if (alive) setMessages(dataM.items || []);
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Delete failed");
-
       setItems((prev) => prev.filter((x) => x.id !== id));
     } catch (e) {
       alert(e.message || "Delete failed");
     }
   };
-const deleteMessage = async (id) => {
-  const sure = window.confirm(t.langToggleHint === "Język" ? "Usunąć wiadomość?" : "Delete this message?");
-  if (!sure) return;
 
-  try {
-    const res = await fetch(`${API_BASE}/messages/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error || "Delete failed");
+  const deleteMessage = async (id) => {
+    const sure = window.confirm(t.langToggleHint === "Język" ? "Usunąć wiadomość?" : "Delete this message?");
+    if (!sure) return;
 
-    setMessages((prev) => prev.filter((x) => x.id !== id));
-  } catch (e) {
-    alert(e.message || "Delete failed");
-  }
-};
+    try {
+      const res = await fetch(`${API_BASE}/messages/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Delete failed");
+      setMessages((prev) => prev.filter((x) => x.id !== id));
+    } catch (e) {
+      alert(e.message || "Delete failed");
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-6 sm:px-8 py-14">
       <div className="flex items-center justify-between gap-4 mb-8">
         <div>
-          <h1 style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }} className="text-3xl">
+          <h1
+            style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }}
+            className="text-3xl"
+          >
             {t.dashboard}
           </h1>
           <p className="text-sm opacity-75">Manage booking requests.</p>
         </div>
+
         <div className="flex items-center gap-2">
-          <Button variant="outline" className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")} onClick={() => (window.location.hash = "#/")}>
+          <Button
+            variant="outline"
+            className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
+            onClick={() => (window.location.hash = "#/")}
+          >
             Back to site
           </Button>
+
           <Button
             variant="outline"
             className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
@@ -1767,7 +1797,13 @@ const deleteMessage = async (id) => {
         </div>
       </div>
 
-      <div className={cx("rounded-[2rem] border overflow-hidden", dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10")}>
+      {/* ================= APPOINTMENTS ================= */}
+      <div
+        className={cx(
+          "rounded-[2rem] border overflow-hidden",
+          dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10"
+        )}
+      >
         <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
 
         {loading ? (
@@ -1792,7 +1828,9 @@ const deleteMessage = async (id) => {
               <tbody>
                 {items.map((it) => (
                   <tr key={it.id} className={cx("border-t", dark ? "border-white/10" : "border-black/10")}>
-                    <td className="p-4 whitespace-nowrap opacity-80">{it.created_at ? new Date(it.created_at).toLocaleString() : "-"}</td>
+                    <td className="p-4 whitespace-nowrap opacity-80">
+                      {it.created_at ? new Date(it.created_at).toLocaleString() : "-"}
+                    </td>
                     <td className="p-4 whitespace-nowrap">{it.name}</td>
                     <td className="p-4 whitespace-nowrap">{it.phone}</td>
                     <td className="p-4 whitespace-nowrap opacity-80">{it.email || "-"}</td>
@@ -1800,20 +1838,20 @@ const deleteMessage = async (id) => {
                     <td className="p-4 whitespace-nowrap">{it.time}</td>
                     <td className="p-4 whitespace-nowrap opacity-80">{it.context || "-"}</td>
                     <td className="p-4 whitespace-nowrap">
-  <Button
-    variant="outline"
-    className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
-    onClick={() => deleteAppt(it.id)}
-  >
-    {t.langToggleHint === "Język" ? "Usuń" : "Delete"}
-  </Button>
-</td>
-
+                      <Button
+                        variant="outline"
+                        className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
+                        onClick={() => deleteAppt(it.id)}
+                      >
+                        {t.langToggleHint === "Język" ? "Usuń" : "Delete"}
+                      </Button>
+                    </td>
                   </tr>
                 ))}
+
                 {items.length === 0 ? (
                   <tr>
-                    <td className="p-8 opacity-70" colSpan={7}>
+                    <td className="p-8 opacity-70" colSpan={8}>
                       No booking requests yet.
                     </td>
                   </tr>
@@ -1823,71 +1861,85 @@ const deleteMessage = async (id) => {
           </div>
         )}
       </div>
-<div className="mt-10" />
 
-<div className={cx("rounded-[2rem] border overflow-hidden", dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10")}>
-  <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
+      {/* ================= MESSAGES ================= */}
+      <div className="mt-10" />
 
-  <div className="p-6">
-    <h2 style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }} className="text-2xl">
-      {t.langToggleHint === "Język" ? "Wiadomości" : "Messages"}
-    </h2>
-    <p className="text-sm opacity-75 mt-1">
-      {t.langToggleHint === "Język" ? "Wiadomości z formularza kontaktowego." : "Messages from the contact form."}
-    </p>
-  </div>
+      <div
+        className={cx(
+          "rounded-[2rem] border overflow-hidden",
+          dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10"
+        )}
+      >
+        <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
 
-  <div className="overflow-auto">
-    <table className="min-w-full text-sm">
-      <thead className={cx(dark ? "bg-white/[0.04]" : "bg-black/[0.03]")}>
-        <tr className="text-left">
-          <th className="p-4">Created</th>
-          <th className="p-4">Name</th>
-          <th className="p-4">Email</th>
-          <th className="p-4">Message</th>
-          <th className="p-4">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {messages.map((m) => (
-          <tr key={m.id} className={cx("border-t", dark ? "border-white/10" : "border-black/10")}>
-            <td className="p-4 whitespace-nowrap opacity-80">{m.created_at ? new Date(m.created_at).toLocaleString() : "-"}</td>
-            <td className="p-4 whitespace-nowrap">{m.name}</td>
-            <td className="p-4 whitespace-nowrap opacity-80">{m.email}</td>
-            <td className="p-4 min-w-[360px]">
-              <div className="opacity-85 whitespace-pre-wrap">{m.message}</div>
-            </td>
-            <td className="p-4 whitespace-nowrap">
-              <Button
-                variant="outline"
-                className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
-                onClick={() => deleteMessage(m.id)}
-              >
-                {t.langToggleHint === "Język" ? "Usuń" : "Delete"}
-              </Button>
-            </td>
-          </tr>
-        ))}
-        {messages.length === 0 ? (
-          <tr>
-            <td className="p-8 opacity-70" colSpan={5}>
-              {t.langToggleHint === "Język" ? "Brak wiadomości." : "No messages yet."}
-            </td>
-          </tr>
-        ) : null}
-      </tbody>
-    </table>
-  </div>
-</div>
+        <div className="p-6">
+          <h2
+            style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }}
+            className="text-2xl"
+          >
+            {t.langToggleHint === "Język" ? "Wiadomości" : "Messages"}
+          </h2>
+          <p className="text-sm opacity-75 mt-1">
+            {t.langToggleHint === "Język" ? "Wiadomości z formularza kontaktowego." : "Messages from the contact form."}
+          </p>
+        </div>
 
+        {msgLoading ? (
+          <div className="p-8 opacity-80">Loading…</div>
+        ) : msgErr ? (
+          <div className="p-8 text-red-400">{msgErr}</div>
+        ) : (
+          <div className="overflow-auto">
+            <table className="min-w-full text-sm">
+              <thead className={cx(dark ? "bg-white/[0.04]" : "bg-black/[0.03]")}>
+                <tr className="text-left">
+                  <th className="p-4">Created</th>
+                  <th className="p-4">Name</th>
+                  <th className="p-4">Email</th>
+                  <th className="p-4">Message</th>
+                  <th className="p-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {messages.map((m) => (
+                  <tr key={m.id} className={cx("border-t", dark ? "border-white/10" : "border-black/10")}>
+                    <td className="p-4 whitespace-nowrap opacity-80">
+                      {m.created_at ? new Date(m.created_at).toLocaleString() : "-"}
+                    </td>
+                    <td className="p-4 whitespace-nowrap">{m.name}</td>
+                    <td className="p-4 whitespace-nowrap opacity-80">{m.email}</td>
+                    <td className="p-4 min-w-[360px]">
+                      <div className="opacity-85 whitespace-pre-wrap">{m.message}</div>
+                    </td>
+                    <td className="p-4 whitespace-nowrap">
+                      <Button
+                        variant="outline"
+                        className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
+                        onClick={() => deleteMessage(m.id)}
+                      >
+                        {t.langToggleHint === "Język" ? "Usuń" : "Delete"}
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
 
-
-
+                {messages.length === 0 ? (
+                  <tr>
+                    <td className="p-8 opacity-70" colSpan={5}>
+                      {t.langToggleHint === "Język" ? "Brak wiadomości." : "No messages yet."}
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
-
-  
 }
+
 
 /* ================= PUBLIC PAGES ================= */
 function HomePage({ onBook, dark, t, categories }) {
