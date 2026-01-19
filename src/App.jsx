@@ -1589,6 +1589,7 @@ function AdminLoginPage({ dark, onAuthed }) {
 
   return (
     <div className="max-w-7xl mx-auto px-6 sm:px-8 py-14">
+    
       <div
         className={cx(
           "max-w-lg rounded-[2rem] border p-10 overflow-hidden",
@@ -1751,36 +1752,7 @@ const [toast, setToast] = useState({ open: false, title: "", message: "" });
 const showToast = (title, message) => {
   setToast({ open: true, title, message });
 };
-const replyToMessage = async (id, toEmail, toName, replyText) => {
-  try {
-    const res = await fetch(`${API_BASE}/messages/${id}/reply`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ reply: replyText }),
-    });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error || "Reply failed");
-
-    showToast(
-      t.langToggleHint === "Język" ? "Wiadomość wysłana" : "Reply sent",
-      t.langToggleHint === "Język"
-        ? `Odpowiedź została wysłana do: ${toEmail}`
-        : `Your reply was sent to: ${toEmail}`
-    );
-
-    return true;
-  } catch (e) {
-    showToast(
-      t.langToggleHint === "Język" ? "Błąd" : "Error",
-      e.message || (t.langToggleHint === "Język" ? "Nie udało się wysłać." : "Failed to send.")
-    );
-    return false;
-  }
-};
 
 const closeToast = () => setToast((t) => ({ ...t, open: false }));
 
@@ -1879,6 +1851,16 @@ const closeToast = () => setToast((t) => ({ ...t, open: false }));
 
   return (
     <div className="max-w-7xl mx-auto px-6 sm:px-8 py-14">
+    <AnimatePresence>
+  <Toast
+    open={toast.open}
+    title={toast.title}
+    message={toast.message}
+    onClose={closeToast}
+    dark={dark}
+  />
+</AnimatePresence>
+
       <div className="flex items-center justify-between gap-4 mb-8">
         <div>
           <h1
@@ -2129,32 +2111,42 @@ const closeToast = () => setToast((t) => ({ ...t, open: false }));
                 className="rounded-full"
                 disabled={replySending || !replyText.trim()}
                 onClick={async () => {
-                  try {
-                    setReplySending(true);
+  try {
+    setReplySending(true);
 
-                    const token = typeof window !== "undefined" ? localStorage.getItem("ow_admin_token") : null;
+    const token = typeof window !== "undefined" ? localStorage.getItem("ow_admin_token") : null;
 
-                    const res = await fetch(`${API_BASE}/messages/${replyingTo.id}/reply`, {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                      },
-                      body: JSON.stringify({ reply: replyText }),
-                    });
+    const res = await fetch(`${API_BASE}/messages/${replyingTo.id}/reply`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ reply: replyText }),
+    });
 
-                    const data = await res.json().catch(() => ({}));
-                    if (!res.ok) throw new Error(data?.error || "Failed to send reply");
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || "Failed to send reply");
 
-                    alert(t.langToggleHint === "Język" ? "Wysłano!" : "Sent!");
-                    setReplyingTo(null);
-                    setReplyText("");
-                  } catch (e) {
-                    alert(e.message || "Failed to send reply");
-                  } finally {
-                    setReplySending(false);
-                  }
-                }}
+    showToast(
+      t.langToggleHint === "Język" ? "Wiadomość wysłana" : "Reply sent",
+      t.langToggleHint === "Język"
+        ? `Odpowiedź została wysłana do: ${replyingTo.email}`
+        : `Your reply was sent to: ${replyingTo.email}`
+    );
+
+    setReplyingTo(null);
+    setReplyText("");
+  } catch (e) {
+    showToast(
+      t.langToggleHint === "Język" ? "Błąd" : "Error",
+      e.message || (t.langToggleHint === "Język" ? "Nie udało się wysłać odpowiedzi." : "Failed to send reply.")
+    );
+  } finally {
+    setReplySending(false);
+  }
+}}
+
               >
                 {replySending
                   ? t.langToggleHint === "Język"
