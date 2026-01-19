@@ -221,6 +221,18 @@ const I18N = {
     },
   ],
 },
+contact: {
+  title: "Napisz do mnie",
+  open: "Kontakt",
+  close: "Zamknij",
+  name: "Imię i nazwisko",
+  email: "Email",
+  message: "Wiadomość",
+  send: "Wyślij",
+  sending: "Wysyłanie…",
+  sent: "Wiadomość wysłana. Dziękuję!",
+  required: "Imię, email i wiadomość są wymagane.",
+},
 
 
     langToggleHint: "Język",
@@ -279,7 +291,7 @@ const I18N = {
       wellnessIntro:
         "Głęboko w Tobie jest pragnienie nie tylko tego, aby dobrze wyglądać — ale przede wszystkim, aby czuć lekkość, witalność i pełną harmonię ze sobą. Holistyczna troska o ciało i umysł to jedna z najpiękniejszych inwestycji w zdrowie: wspiera równowagę, regenerację i codzienne poczucie spokoju.",
       noSugarAdults:
-        "Od procesu wytwarzania energii w organizmie, przez mechanizmy spadku siły i nastroju – krok po kroku przeanalizujemy wpływ węglowodanów na Twoje ciało i umysł. Dzięki przygotowanej przeze mnie prezentacji zrozumiesz, jak podejmować świadome wybory żywieniowe i odróżniać fakty od marketingowych chwytów. To praktyczna wiedza, która pozwoli Ci odzyskać pełną kontrolę nad swoją energią i zdrowiem, dając odpowiedzi na wszystkie nurtujące Cię pytania.",
+  "Przedstawiam program edukacyjny „No Sugar” – „The Sugar Trap”, który bada wpływ cukru na organizm człowieka, a także na dobrostan fizyczny i psychiczny.\n\nTreść prezentacji opiera się na powszechnie dostępnych informacjach oraz zaleceniach żywieniowych upowszechnianych przez lekarzy, dietetyków i wiarygodne źródła medialne oraz literaturze przedmiotu. Program ma charakter wyłącznie informacyjno-edukacyjny i w żadnym wypadku nie stanowi porady lekarskiej, diagnostycznej ani terapeutycznej. W przypadku konkretnych problemów zdrowotnych należy zawsze skonsultować się z lekarzem lub wykwalifikowanym specjalistą.\n\nKompleksowy program koncentruje się na roli węglowodanów w diecie, ujawnia ilość cukru ukrytego w codziennym pożywieniu oraz uczy, jak praktycznie rozróżniać cukry proste i złożone, aby świadomie dokonywać lepszych wyborów żywieniowych.\n\nZapraszam do udziału w programie:\n\n· Dla Ciebie – grupa dla dorosłych\n· Dla Twojej organizacji – warsztaty dla firm lub grup.\n· Pakiet „Extra dla Rodziny” – obejmujący 5 sesji: pierwszą dla rodziców, a kolejne cztery tematyczne zajęcia edukacyjne dla dzieci, budujące zdrowe nawyki od najmłodszych lat.",
       noSugarKids:
         "Podczas naszej przygody odkryjemy, skąd czerpiemy energię do zabawy i nauki oraz co sprawia, że ją tracimy. Dowiemy się, co dzieje się w naszym ciele, dlaczego czasem czujemy się zmęczeni lub markotni, i jak być detektywem podczas wyboru posiłków. Moja specjalna prezentacja pokaże wam te wszystkie sekrety w zabawnej i prostej formie. Dzięki niej zostaniecie prawdziwymi tropicielami cukru – nauczycie się rozpoznawać, gdzie się on chowa w produktach, i jak wybierać mądrze, by być pełnym siły.",
     },
@@ -295,16 +307,18 @@ const I18N = {
     blurb:
       "Yoga Kids to więcej niż tylko ruch. To zajęcia, które rosną razem z Twoim dzieckiem. Dla najmłodszych są fascynującą zabawą pełną radości i kreatywności, która z czasem płynnie ewoluuje w profesjonalne wprowadzenie do świata jogi. Uczymy nie tylko gibkości, ale przede wszystkim koncentracji, radzenia sobie z emocjami i pewności siebie. To piękny sposób, by w atmosferze radości zadbać o zdrowy kręgosłup i wewnętrzny spokój Twojego dziecka.",
   },
-  adults: {
-    title: "Joga terapeutyczna dla dorosłych",
-    blurb:
-      "Towarzyszę dorosłym w odnajdywaniu wewnętrznej siły — praktyka wspierająca uważność, spokój i ciało bez presji.",
-  },
-  seniors: {
-    title: "Joga terapeutyczna dla seniorów",
-    blurb:
-      "Łagodna praktyka wspierająca mobilność, równowagę i regenerację — w spokojnym tempie i z troską o stawy oraz kręgosłup.",
-  },
+adults: {
+  title: "Joga terapeutyczna dla dorosłych",
+  blurb:
+    "Odkryj moc klasycznej jogi z elementami jogi Nidry, jej uzdrawiający relaks balansujący w tobie energię Yin i Yang\n\nUwolnij napięcie\nOdnajdź równowagę\nNaucz się kochać siebie na nowo\n\n“Joga to nie dotarcie na szczyt góry, ale wspinaczka która odkrywa przed nami piękno krajobrazu”\n\nz miłością witam na macie Olivia",
+},
+
+seniors: {
+  title: "Joga terapeutyczna dla seniorów",
+  blurb:
+    "Odpowiadając na Twoje potrzeby, stworzę jogę dla seniorów czerpiącą z klasycznej harmonii i głębokiej relaksacji Nidry. Będzie to praktyka łagodna i bezpieczna, oferująca modyfikacje z wykorzystaniem krzeseł i ściany, by dostosować się do indywidualnych możliwości. Każda sesja ma na celu stopniowe rozluźnianie ciała, wyciszenie natłoku myśli oraz przywrócenie wewnętrznej równowagi między energią a spokojem. Kluczowym elementem będzie głęboka jogiczna relaksacja, prowadząca do uwolnienia napięć i pokoju umysłu. Dzięki temu praktyka stanie się rytuałem troski o siebie, pomagającym na nowo odnaleźć wewnętrzny spokój i życzliwość dla własnego ciała.",
+},
+
 },
 
       education: {
@@ -318,11 +332,12 @@ const I18N = {
           blurb:
             "Zabawna i prosta edukacja: skąd mamy energię, dlaczego ją tracimy i jak zostać „detektywem cukru”.",
         },
-        symptoms: {
-          title: "Objawy nie mają wieku",
-          blurb:
-            "Rozpoznawanie wzorców i sygnałów ciała, które mogą wiązać się z nadmiarem cukru — u dzieci i dorosłych.",
-        },
+symptoms: {
+  title: "SMART Child",
+  blurb:
+    "Program \"Smart Child\": Tam, gdzie dźwięk maluje, a taniec opowiada\n\nPrzedstawiam program edukacyjny \"Smart Child\", działający pod hasłem: \"Tam, gdzie dźwięk maluje, a taniec opowiada\".\n\nSą to regularne sesje, których głównym celem jest wszechstronne promowanie kultury oraz wprowadzanie dzieci w świat muzyki klasycznej, malarstwa i tańca. Nasza misja to rozwój przez sztukę i ruch, gdzie wyobraźnia i kreatywność dziecka stają się głównym narzędziem odkrywania, wyrażania siebie i twórczego myślenia.\n\nKażde spotkanie łączy w sobie trzy integralne filary:\n\n1. Edukację kulturową: W przystępny sposób prezentujemy dzieła mistrzów muzyki i malarstwa, budując podstawy świadomego odbioru kultury.\n2. Ekspresję przez ruch i taniec: Rozwijamy koordynację, świadomość ciała oraz umiejętność wyrażania emocji i fabuły za pomocą ruchu, rozwijając wyobraźnię przestrzenną.\n3. Wyciszenie i uważność: Każda sesja zawiera element relaksacyjno-medytacyjny, który uczy dzieci technik oddechowych, świadomego wyciszania ciała i umysłu oraz uważnego wsłuchiwania się w dźwięki i swoje wnętrze po aktywnej zabawie. To chwila na integrację wrażeń i regenerację.\n\nPodczas cotygodniowych spotkań stwarzamy przestrzeń do twórczej interpretacji, gdzie dźwięki inspirują do tworzenia własnych „obrazów”, a opowieści znajdują wyraz w tańcu, kończąc się momentem wyciszenia i refleksji.\n\nProgram ma charakter wyłącznie edukacyjny i rozwojowy, a jego celem jest rozwijanie wyobraźni, kreatywności, wrażliwości oraz umiejętności społecznych. Elementy relaksacyjne służą wyciszeniu i nauce koncentracji oraz nie stanowią terapii, diagnozy ani zajęć z zakresu medycyny. W przypadku specyficznych potrzeb rozwojowych lub zdrowotnych dziecka, zalecana jest konsultacja z odpowiednim specjalistą.\n\nZapraszamy do udziału:\n\n· Dla Szkół i Przedszkoli: Cykliczne zajęcia dostosowane do programu placówki, realizowane na jej terenie.\n· Dla Instytucji i Organizacji: Warsztaty tematyczne dla domów kultury, fundacji, świetlic oraz innych grup zorganizowanych.\n\nProgram \"Smart Child\" to inwestycja w rozwój wyobraźni, kreatywności, równowagi emocjonalnej i intelektualny rozwój młodego pokolenia poprzez uniwersalny język sztuki oraz naukę uważności.",
+},
+
       },
       wellness: {
         bodyMind: {
@@ -567,6 +582,18 @@ const I18N = {
   ],
 },
 
+contact: {
+  title: "Contact me",
+  open: "Contact",
+  close: "Close",
+  name: "Full name",
+  email: "Email",
+  message: "Message",
+  send: "Send",
+  sending: "Sending…",
+  sent: "Message sent. Thank you!",
+  required: "Name, email and message are required.",
+},
 
     langToggleHint: "Language",
     navBrand: "OLIVIA WESTON",
@@ -620,8 +647,10 @@ const I18N = {
         "Together, we will create a safe space where you will regain mindfulness and trust in yourself. I will help you hear the signals of your body, so that you can take full responsibility for your choices and build lasting, healthy habits.",
       wellnessIntro:
         "Deep down, you desire not only to look good — you yearn to feel light, vital, and in complete harmony with yourself. Professional, holistic treatments are a beautiful investment in your health: they support balance, recovery, and daily calm.",
+      
       noSugarAdults:
-        "From the process of energy production in the body to the mechanisms behind drops in strength and mood, we will analyze step by step the impact of carbohydrates on your body and mind. Through the presentation I have prepared, you will understand how to make conscious nutritional choices and distinguish facts from marketing tactics. This practical knowledge will allow you to regain full control over your energy and health, providing answers to all your pressing questions.",
+  "The Sugar Trap\n\nI present the educational programme \"No Sugar\" – \"The Sugar Trap\", which investigates the impact of sugar on the human body, as well as on physical and mental wellbeing.\n\nThe presentation content is based on widely accessible information, nutritional guidelines promoted by doctors and dietitians, and credible media sources and scientific literature. The programme is strictly informational and educational in nature and does not, under any circumstances, constitute medical, diagnostic, or therapeutic advice. For any specific health concerns, always consult a physician or qualified specialist.\n\nThis comprehensive programme focuses on the role of carbohydrates in our diet, reveals the amount of hidden sugar in everyday foods, and provides practical knowledge on distinguishing between simple and complex sugars—empowering you to make conscious, healthier nutritional choices.\n\nI invite you to join the programme:\n\n· For You – an adult group session.\n· For Your Organisation – tailored workshops for companies or teams.\n· The \"Family Extra\" Package – includes 5 sessions: the first for parents, followed by four thematic educational workshops for children, designed to build healthy habits from an early age.",
+
       noSugarKids:
         "During our adventure, we will discover where we get the energy for play and learning, and what makes us lose it. We'll learn what happens in our bodies, why we sometimes feel tired or grumpy, and how to be a detective when choosing meals. My special presentation will show you all these secrets in a fun and simple way. Thanks to it, you will become real sugar detectives – you will learn to recognize where it hides in products and how to choose wisely to be full of energy.",
     },
@@ -637,16 +666,18 @@ const I18N = {
     blurb:
       "Yoga Kids – More Than Just Movement. These classes grow with your child. For the youngest ones, it is a fascinating adventure full of joy and creativity, which seamlessly evolves into a professional introduction to the world of yoga. We teach not only flexibility but, above all, concentration, emotional balance, and self-confidence. It is a beautiful way to nurture your child’s healthy spine and inner peace in an atmosphere of joy.",
   },
-  adults: {
-    title: "Yoga Adults",
-    blurb:
-      "A supportive practice to reduce tension, rebuild strength, and regulate the nervous system—without pressure.",
-  },
-  seniors: {
-    title: "Yoga Seniors",
-    blurb:
-      "A gentle practice focused on mobility, balance, and ease—supporting joints, posture, and calm strength at a comfortable pace.",
-  },
+adults: {
+  title: "Yoga Adults",
+  blurb:
+    "Classic Yoga enriched with deep Nidra practice balancing Yin & Yang\n\nMelt away stress and tension\nQuiet your busy mind\nRediscover your inner balance\nFall in love with yourself again\n\nFind Your Inner Calm\nA warm welcome on the mat",
+},
+
+seniors: {
+  title: "Yoga Seniors",
+  blurb:
+    "In response to your needs, I will create a seniors’ yoga practice inspired by the harmony of classic yoga and deep Nidra relaxation. It will be gentle and safe, with modifications using a chair and wall support to match individual abilities. Each session is designed to gradually release tension, quiet the mind, and restore inner balance between energy and calm. A key element is deep yogic relaxation, helping you let go of stress and find peace of mind. This practice becomes a caring self-ritual—rediscovering calm, ease, and kindness toward your body.",
+},
+
 },
 
       education: {
@@ -658,10 +689,12 @@ const I18N = {
           title: "Whats up Body",
           blurb: "Support healthier habits with calm guidance instead of restriction.",
         },
-        symptoms: {
-          title: "Smart Child",
-          blurb: "Recognise patterns linked to excess sugar intake across all ages.",
-        },
+symptoms: {
+  title: "Smart Child",
+  blurb:
+    "I present the educational programme \"Smart Child\" - \"Where Sound Paints and Dance Tells a Story\".\n\nThese are regular sessions whose primary goal is to comprehensively promote culture and introduce children to the world of classical music, painting, and dance. Our mission is development through sound and movement, where a child's imagination and creativity become the primary tools for discovery, self-expression, and creative thinking.\n\nEach meeting combines three integral pillars:\n\n1. Cultural Education: We present the works of music and painting masters in an accessible way, building the foundations for conscious cultural reception.\n2. Expression Through Movement and Dance: We develop coordination, body awareness, and the ability to express emotions and narratives through movement, fostering spatial imagination.\n3. Calm and Mindfulness: Each session includes a relaxation and guided focus element, guiding children towards conscious calming of the body and mind, and mindful listening to sounds and their inner feelings after active play. This is a moment for integrating impressions and peaceful regeneration.\n\nDuring the weekly sessions, we create a space for creative interpretation, where sounds inspire the creation of personal \"images,\" and stories find expression in dance, concluding with a moment of calm and reflection.\n\nThe programme is strictly educational and developmental in nature, aiming to develop imagination, creativity, sensitivity, and social skills. The relaxation elements serve to promote a sense of calm and focus and do not constitute therapy, diagnosis, or activities within the scope of medicine. In the case of specific developmental or health needs of a child, consultation with an appropriate specialist is recommended.\n\nWe invite you to participate:\n\n· For Schools and Nurseries: Regular classes tailored to the institution's programme, conducted on its premises.\n· For Institutions and Organisations: Thematic workshops for community centres, foundations, after-school clubs, and other organised groups.\n\nThe \"Smart Child\" programme is an investment in the development of imagination, creativity, emotional balance, and intellectual growth of the young generation through the universal language of art and guided mindful practice.",
+},
+
       },
       wellness: {
         bodyMind: {
@@ -1399,6 +1432,152 @@ function BookingModal({ open, onClose, contextTitle, t }) {
     </div>
   );
 }
+/* ================= CONTACT POPUP (Education) ================= */
+function ContactPopup({ open, onOpen, onClose, dark, t }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [err, setErr] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setName("");
+      setEmail("");
+      setMessage("");
+      setErr("");
+      setSending(false);
+      setSent(false);
+    }
+  }, [open]);
+
+  return (
+    <>
+      {/* floating button */}
+      <div className="fixed bottom-6 right-6 z-40">
+        {!open ? (
+          <Button
+            className="rounded-full px-6 py-4 shadow-[0_22px_55px_-35px_rgba(0,0,0,.55)]"
+            onClick={onOpen}
+          >
+            {t.contact.open}
+          </Button>
+        ) : null}
+      </div>
+
+      {/* modal */}
+      {open ? (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/45" onClick={onClose} />
+
+          <motion.div
+            initial={{ opacity: 0, y: 18, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className={cx(
+              "relative w-[min(560px,92vw)] rounded-[2rem] overflow-hidden shadow-[0_40px_120px_-60px_rgba(0,0,0,.7)]",
+              dark ? "bg-[#0f1414] text-white" : "bg-white text-neutral-900"
+            )}
+          >
+            <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
+
+            <div className={cx("p-7 border-b", dark ? "border-white/10" : "border-black/10")}>
+              <div className="flex items-start justify-between gap-6">
+                <div>
+                  <h3
+                    style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }}
+                    className="text-2xl"
+                  >
+                    {t.contact.title}
+                  </h3>
+                  <p className="text-sm opacity-70 mt-1">Education</p>
+                </div>
+
+                <Button variant="ghost" onClick={onClose} className={dark ? "hover:bg-white/10" : "hover:bg-black/5"}>
+                  {t.contact.close}
+                </Button>
+              </div>
+            </div>
+
+            <div className="p-7 grid gap-3">
+              <input
+                className={cx(
+                  "rounded-2xl px-4 py-3 border outline-none",
+                  dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10"
+                )}
+                placeholder={t.contact.name}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+
+              <input
+                className={cx(
+                  "rounded-2xl px-4 py-3 border outline-none",
+                  dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10"
+                )}
+                placeholder={t.contact.email}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+
+              <textarea
+                className={cx(
+                  "rounded-2xl px-4 py-3 border outline-none min-h-[130px] resize-none",
+                  dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10"
+                )}
+                placeholder={t.contact.message}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+
+              {err ? <p className={cx("text-sm", dark ? "text-red-300" : "text-red-600")}>{err}</p> : null}
+
+              {!sent ? (
+                <Button
+                  className="rounded-full px-10 py-4 mt-2"
+                  disabled={sending}
+                  onClick={async () => {
+                    setErr("");
+                    if (!name.trim() || !email.trim() || !message.trim()) {
+                      setErr(t.contact.required);
+                      return;
+                    }
+
+                    setSending(true);
+                    try {
+                      const res = await fetch(`${API_BASE}/messages`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          name: name.trim(),
+                          email: email.trim(),
+                          message: message.trim(),
+                        }),
+                      });
+                      const data = await res.json();
+                      if (!res.ok) throw new Error(data?.error || "Failed to send");
+                      setSent(true);
+                    } catch (e) {
+                      setErr(e.message || "Failed to send");
+                    } finally {
+                      setSending(false);
+                    }
+                  }}
+                >
+                  {sending ? t.contact.sending : t.contact.send}
+                </Button>
+              ) : (
+                <div className={cx("rounded-2xl border p-4 mt-2", dark ? "border-white/10" : "border-black/10")}>
+                  <p className="text-sm">{t.contact.sent}</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      ) : null}
+    </>
+  );
+}
 
 
 /* ================= ADMIN ================= */
@@ -1491,6 +1670,8 @@ function AdminLoginPage({ dark, onAuthed }) {
 
 function AdminDashboardPage({ dark, t }) {
   const [items, setItems] = useState([]);
+  const [messages, setMessages] = useState([]);
+
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -1508,6 +1689,13 @@ function AdminDashboardPage({ dark, t }) {
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || "Failed to load");
         if (alive) setItems(data.items || []);
+        const resM = await fetch(`${API_BASE}/messages`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+const dataM = await resM.json();
+if (!resM.ok) throw new Error(dataM?.error || "Failed to load messages");
+if (alive) setMessages(dataM.items || []);
+
       } catch (e) {
         if (alive) setErr(e.message || "Failed to load");
       } finally {
@@ -1535,6 +1723,23 @@ function AdminDashboardPage({ dark, t }) {
       alert(e.message || "Delete failed");
     }
   };
+const deleteMessage = async (id) => {
+  const sure = window.confirm(t.langToggleHint === "Język" ? "Usunąć wiadomość?" : "Delete this message?");
+  if (!sure) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/messages/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error || "Delete failed");
+
+    setMessages((prev) => prev.filter((x) => x.id !== id));
+  } catch (e) {
+    alert(e.message || "Delete failed");
+  }
+};
 
   return (
     <div className="max-w-7xl mx-auto px-6 sm:px-8 py-14">
@@ -1618,8 +1823,70 @@ function AdminDashboardPage({ dark, t }) {
           </div>
         )}
       </div>
+<div className="mt-10" />
+
+<div className={cx("rounded-[2rem] border overflow-hidden", dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10")}>
+  <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
+
+  <div className="p-6">
+    <h2 style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }} className="text-2xl">
+      {t.langToggleHint === "Język" ? "Wiadomości" : "Messages"}
+    </h2>
+    <p className="text-sm opacity-75 mt-1">
+      {t.langToggleHint === "Język" ? "Wiadomości z formularza kontaktowego." : "Messages from the contact form."}
+    </p>
+  </div>
+
+  <div className="overflow-auto">
+    <table className="min-w-full text-sm">
+      <thead className={cx(dark ? "bg-white/[0.04]" : "bg-black/[0.03]")}>
+        <tr className="text-left">
+          <th className="p-4">Created</th>
+          <th className="p-4">Name</th>
+          <th className="p-4">Email</th>
+          <th className="p-4">Message</th>
+          <th className="p-4">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {messages.map((m) => (
+          <tr key={m.id} className={cx("border-t", dark ? "border-white/10" : "border-black/10")}>
+            <td className="p-4 whitespace-nowrap opacity-80">{m.created_at ? new Date(m.created_at).toLocaleString() : "-"}</td>
+            <td className="p-4 whitespace-nowrap">{m.name}</td>
+            <td className="p-4 whitespace-nowrap opacity-80">{m.email}</td>
+            <td className="p-4 min-w-[360px]">
+              <div className="opacity-85 whitespace-pre-wrap">{m.message}</div>
+            </td>
+            <td className="p-4 whitespace-nowrap">
+              <Button
+                variant="outline"
+                className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
+                onClick={() => deleteMessage(m.id)}
+              >
+                {t.langToggleHint === "Język" ? "Usuń" : "Delete"}
+              </Button>
+            </td>
+          </tr>
+        ))}
+        {messages.length === 0 ? (
+          <tr>
+            <td className="p-8 opacity-70" colSpan={5}>
+              {t.langToggleHint === "Język" ? "Brak wiadomości." : "No messages yet."}
+            </td>
+          </tr>
+        ) : null}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+
     </div>
   );
+
+  
 }
 
 /* ================= PUBLIC PAGES ================= */
@@ -2007,6 +2274,7 @@ export default function App() {
   const [dark, setDark] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingContext, setBookingContext] = useState(t.book);
+const [contactOpen, setContactOpen] = useState(false);
 
   useEffect(() => {
     setBookingContext((c) => c || t.book);
@@ -2083,7 +2351,20 @@ export default function App() {
       </AnimatePresence>
 
       <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} contextTitle={bookingContext} t={t} />
-    
+    {/* Contact popup only on Education pages */}
+{parsed.page !== "admin_login" &&
+parsed.page !== "admin_dashboard" &&
+parsed.page !== "home" &&
+parsed.category?.key === "education" ? (
+  <ContactPopup
+    open={contactOpen}
+    onOpen={() => setContactOpen(true)}
+    onClose={() => setContactOpen(false)}
+    dark={dark}
+    t={t}
+  />
+) : null}
+
     </Shell>
   );
 }
