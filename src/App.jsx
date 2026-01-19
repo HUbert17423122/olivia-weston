@@ -868,88 +868,142 @@ function Shell({ dark, onToggleDark, lang, onToggleLang, t, children }) {
         a{ text-decoration: none; }
       `}</style>
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 pt-8 flex items-center justify-between">
-        <NavLink
-          to="#/"
+      {/* ===== CLEAN NAV WRAPPER (no new actions, just layout) ===== */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-4 sm:pt-8">
+        <div
           className={cx(
-            "tracking-[0.16em] text-[11px] sm:text-xs uppercase opacity-90 hover:opacity-100 transition",
-            dark ? "text-white" : "text-neutral-900"
+            "rounded-[1.6rem] border px-4 sm:px-5 py-3 sm:py-4",
+            "flex items-center justify-between gap-3 sm:gap-4",
+            "backdrop-blur",
+            dark ? "bg-white/[0.05] border-white/10" : "bg-white/70 border-black/10"
           )}
-          style={{ fontFamily: "var(--ow-sans)" }}
         >
-          {t.navBrand}
-        </NavLink>
+          {/* Brand */}
+          <NavLink
+            to="#/"
+            className={cx(
+              "tracking-[0.16em] text-[11px] sm:text-xs uppercase transition",
+              "opacity-90 hover:opacity-100",
+              "whitespace-nowrap"
+            )}
+            style={{ fontFamily: "var(--ow-sans)" }}
+          >
+            {t.navBrand}
+          </NavLink>
 
-        <div className="flex items-center gap-2">
+          {/* Right cluster */}
+          <div className="flex items-center justify-end gap-2 sm:gap-3 min-w-0">
+            {/* Language pill (desktop only) */}
+            <div
+              className={cx(
+                "hidden sm:flex items-center gap-2 rounded-full border px-2 py-2",
+                dark ? "bg-white/5 border-white/10" : "bg-white/70 border-black/10"
+              )}
+            >
+              <span className="text-[11px] opacity-70 px-3">{t.langToggleHint}</span>
+
+              <Button
+                variant={lang === "pl" ? undefined : "ghost"}
+                className={cx(
+                  "px-4 py-2",
+                  lang === "pl" ? "bg-neutral-900 text-white hover:bg-neutral-800" : ""
+                )}
+                onClick={() => onToggleLang("pl")}
+                aria-pressed={lang === "pl"}
+              >
+                PL
+              </Button>
+
+              <Button
+                variant={lang === "en" ? undefined : "ghost"}
+                className={cx(
+                  "px-4 py-2",
+                  lang === "en" ? "bg-neutral-900 text-white hover:bg-neutral-800" : ""
+                )}
+                onClick={() => onToggleLang("en")}
+                aria-pressed={lang === "en"}
+              >
+                EN
+              </Button>
+            </div>
+
+            {/* Admin/Dashboard */}
+            {token ? (
+              <NavLink to="#/admin/dashboard" className="inline-flex">
+                <Button
+                  variant="outline"
+                  className={cx(
+                    "rounded-full px-5 sm:px-6 py-2.5 sm:py-3",
+                    dark ? "" : "border-black/10 bg-white"
+                  )}
+                >
+                  {t.dashboard}
+                </Button>
+              </NavLink>
+            ) : (
+              <NavLink to="#/admin/login" className="inline-flex">
+                <Button
+                  variant="outline"
+                  className={cx(
+                    "rounded-full px-5 sm:px-6 py-2.5 sm:py-3",
+                    dark ? "" : "border-black/10 bg-white"
+                  )}
+                >
+                  {t.admin}
+                </Button>
+              </NavLink>
+            )}
+
+            {/* Dark toggle */}
+            <Button
+              variant="ghost"
+              onClick={onToggleDark}
+              className={cx(
+                "rounded-full px-4 sm:px-5 py-2.5 sm:py-3",
+                dark ? "hover:bg-white/10" : "hover:bg-black/5"
+              )}
+            >
+              {dark ? t.darkToggleLight : t.darkToggleDark}
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile language pill (full-width, cleaner) */}
+        <div className="sm:hidden mt-3">
           <div
             className={cx(
-              "hidden sm:flex items-center gap-2 rounded-full px-2 py-2 border",
+              "w-full flex items-center justify-between gap-2 rounded-full border px-2 py-2",
               dark ? "bg-white/5 border-white/10" : "bg-white/70 border-black/10"
             )}
           >
             <span className="text-[11px] opacity-70 px-3">{t.langToggleHint}</span>
-            <Button
-              variant={lang === "pl" ? undefined : "ghost"}
-              className={cx("px-4 py-2", lang === "pl" ? "bg-neutral-900 text-white hover:bg-neutral-800" : "")}
-              onClick={() => onToggleLang("pl")}
-              aria-pressed={lang === "pl"}
-            >
-              PL
-            </Button>
-            <Button
-              variant={lang === "en" ? undefined : "ghost"}
-              className={cx("px-4 py-2", lang === "en" ? "bg-neutral-900 text-white hover:bg-neutral-800" : "")}
-              onClick={() => onToggleLang("en")}
-              aria-pressed={lang === "en"}
-            >
-              EN
-            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant={lang === "pl" ? undefined : "ghost"}
+                className={cx(
+                  "px-4 py-2",
+                  lang === "pl" ? "bg-neutral-900 text-white hover:bg-neutral-800" : ""
+                )}
+                onClick={() => onToggleLang("pl")}
+                aria-pressed={lang === "pl"}
+              >
+                PL
+              </Button>
+
+              <Button
+                variant={lang === "en" ? undefined : "ghost"}
+                className={cx(
+                  "px-4 py-2",
+                  lang === "en" ? "bg-neutral-900 text-white hover:bg-neutral-800" : ""
+                )}
+                onClick={() => onToggleLang("en")}
+                aria-pressed={lang === "en"}
+              >
+                EN
+              </Button>
+            </div>
           </div>
-
-          {token ? (
-            <NavLink to="#/admin/dashboard" className="inline-flex">
-              <Button variant="outline" className={cx("rounded-full px-6", dark ? "" : "border-black/10 bg-white")}>
-                {t.dashboard}
-              </Button>
-            </NavLink>
-          ) : (
-            <NavLink to="#/admin/login" className="inline-flex">
-              <Button variant="outline" className={cx("rounded-full px-6", dark ? "" : "border-black/10 bg-white")}>
-                {t.admin}
-              </Button>
-            </NavLink>
-          )}
-
-          <Button variant="ghost" onClick={onToggleDark} className={dark ? "hover:bg-white/10" : "hover:bg-black/5"}>
-            {dark ? t.darkToggleLight : t.darkToggleDark}
-          </Button>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 pt-3 sm:hidden">
-        <div
-          className={cx(
-            "inline-flex items-center gap-2 rounded-full px-2 py-2 border",
-            dark ? "bg-white/5 border-white/10" : "bg-white/70 border-black/10"
-          )}
-        >
-          <span className="text-[11px] opacity-70 px-3">{t.langToggleHint}</span>
-          <Button
-            variant={lang === "pl" ? undefined : "ghost"}
-            className={cx("px-4 py-2", lang === "pl" ? "bg-neutral-900 text-white hover:bg-neutral-800" : "")}
-            onClick={() => onToggleLang("pl")}
-            aria-pressed={lang === "pl"}
-          >
-            PL
-          </Button>
-          <Button
-            variant={lang === "en" ? undefined : "ghost"}
-            className={cx("px-4 py-2", lang === "en" ? "bg-neutral-900 text-white hover:bg-neutral-800" : "")}
-            onClick={() => onToggleLang("en")}
-            aria-pressed={lang === "en"}
-          >
-            EN
-          </Button>
         </div>
       </div>
 
@@ -964,6 +1018,7 @@ function Shell({ dark, onToggleDark, lang, onToggleLang, t, children }) {
     </div>
   );
 }
+
 
 /* ================= HERO BACKDROP ================= */
 function HeroBackdrop({
