@@ -6,6 +6,7 @@ import rateLimit from "express-rate-limit";
 import { authRouter } from "./routes/auth.js";
 import { apptRouter } from "./routes/appointments.js";
 import { pool } from "./db.js";
+import { msgRouter } from "./routes/messages.js";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -53,6 +54,7 @@ app.get("/health", (_, res) => res.json({ ok: true }));
 
 app.use("/api/auth", authRouter);
 app.use("/api/appointments", apptRouter);
+app.use("/api/messages", msgRouter);
 
 // Basic DB init (run once on start)
 // Basic DB init (run once on start)
@@ -66,6 +68,15 @@ async function init() {
       date TEXT NOT NULL,
       time TEXT NOT NULL,
       context TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS messages (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      message TEXT NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `);
