@@ -1669,6 +1669,12 @@ function AdminLoginPage({ dark, onAuthed }) {
 }
 
 function AdminDashboardPage({ dark, t }) {
+
+  const [replyingTo, setReplyingTo] = useState(null);
+const [replyText, setReplyText] = useState("");
+const [replySending, setReplySending] = useState(false);
+
+
   const [items, setItems] = useState([]);
   const [messages, setMessages] = useState([]);
 
@@ -1915,15 +1921,29 @@ function AdminDashboardPage({ dark, t }) {
   </div>
 </td>
 
-                    <td className="p-4 whitespace-nowrap">
-                      <Button
-                        variant="outline"
-                        className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
-                        onClick={() => deleteMessage(m.id)}
-                      >
-                        {t.langToggleHint === "Język" ? "Usuń" : "Delete"}
-                      </Button>
-                    </td>
+                   <td className="p-4 whitespace-nowrap">
+  <div className="flex gap-2">
+    <Button
+      variant="outline"
+      className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
+      onClick={() => {
+        setReplyingTo(m);
+        setReplyText("");
+      }}
+    >
+      {t.langToggleHint === "Język" ? "Odpowiedz" : "Reply"}
+    </Button>
+
+    <Button
+      variant="outline"
+      className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
+      onClick={() => deleteMessage(m.id)}
+    >
+      {t.langToggleHint === "Język" ? "Usuń" : "Delete"}
+    </Button>
+  </div>
+</td>
+
                   </tr>
                 ))}
 
@@ -1939,9 +1959,101 @@ function AdminDashboardPage({ dark, t }) {
           </div>
         )}
       </div>
+
+      {/* ================= REPLY MODAL (INSERTED HERE) ================= */}
+      {replyingTo ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/45" onClick={() => setReplyingTo(null)} />
+
+          <div
+            className={cx(
+              "relative w-[min(620px,92vw)] rounded-[2rem] p-6 border",
+              dark ? "bg-[#0f1414] border-white/10 text-white" : "bg-white border-black/10 text-neutral-900"
+            )}
+          >
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h3 style={{ fontFamily: "var(--ow-display)", fontWeight: 650 }} className="text-xl">
+                  {t.langToggleHint === "Język" ? "Odpowiedź" : "Reply"}
+                </h3>
+                <p className="text-sm opacity-75 mt-1">
+                  {replyingTo.name} — {replyingTo.email}
+                </p>
+              </div>
+
+              <Button variant="ghost" onClick={() => setReplyingTo(null)} className={dark ? "hover:bg-white/10" : "hover:bg-black/5"}>
+                {t.langToggleHint === "Język" ? "Zamknij" : "Close"}
+              </Button>
+            </div>
+
+            <textarea
+              className={cx(
+                "w-full rounded-2xl px-4 py-3 border outline-none min-h-[160px] resize-none",
+                dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10"
+              )}
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder={t.langToggleHint === "Język" ? "Napisz odpowiedź..." : "Write your reply..."}
+            />
+
+            <div className="flex justify-end gap-3 mt-4">
+              <Button
+                variant="outline"
+                className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
+                onClick={() => setReplyingTo(null)}
+                disabled={replySending}
+              >
+                {t.langToggleHint === "Język" ? "Anuluj" : "Cancel"}
+              </Button>
+
+              <Button
+                className="rounded-full"
+                disabled={replySending || !replyText.trim()}
+                onClick={async () => {
+                  try {
+                    setReplySending(true);
+
+                    const token = typeof window !== "undefined" ? localStorage.getItem("ow_admin_token") : null;
+
+                    const res = await fetch(`${API_BASE}/messages/${replyingTo.id}/reply`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({ reply: replyText }),
+                    });
+
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data?.error || "Failed to send reply");
+
+                    alert(t.langToggleHint === "Język" ? "Wysłano!" : "Sent!");
+                    setReplyingTo(null);
+                    setReplyText("");
+                  } catch (e) {
+                    alert(e.message || "Failed to send reply");
+                  } finally {
+                    setReplySending(false);
+                  }
+                }}
+              >
+                {replySending
+                  ? t.langToggleHint === "Język"
+                    ? "Wysyłanie..."
+                    : "Sending..."
+                  : t.langToggleHint === "Język"
+                  ? "Wyślij"
+                  : "Send"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {/* ================= END REPLY MODAL ================= */}
     </div>
   );
 }
+
 
 
 /* ================= PUBLIC PAGES ================= */
