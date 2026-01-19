@@ -7,6 +7,7 @@ import { authRouter } from "./routes/auth.js";
 import { apptRouter } from "./routes/appointments.js";
 import { pool } from "./db.js";
 import { msgRouter } from "./routes/messages.js";
+import { settingsRouter } from "./routes/settings.js";
 
 
 const app = express();
@@ -14,6 +15,7 @@ app.set("trust proxy", 1);
 
 app.use(helmet());
 app.use(express.json());
+app.use("/api/settings", settingsRouter);
 
 const allow = (process.env.CORS_ORIGIN || "")
   .split(",")
@@ -80,6 +82,19 @@ async function init() {
       message TEXT NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    )
+  `);
+
+  // default: booking enabled
+  await pool.query(`
+    INSERT INTO settings (key, value)
+    VALUES ('booking_enabled', 'true')
+    ON CONFLICT (key) DO NOTHING
   `);
 
   // Ensure context is NOT NULL (your schema currently allows null)

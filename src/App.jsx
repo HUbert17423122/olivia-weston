@@ -1171,6 +1171,8 @@ function BookingModal({ open, onClose, contextTitle, t }) {
   const dates = useMemo(() => nextDays(14), []);
   const slots = useMemo(() => ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"], []);
 
+  const [bookingEnabled, setBookingEnabled] = useState(true);
+
   const [takenSlots, setTakenSlots] = useState([]);
   const [pickedDate, setPickedDate] = useState(dates[2] || null);
   const [pickedSlot, setPickedSlot] = useState(slots[1] || null);
@@ -1184,6 +1186,28 @@ function BookingModal({ open, onClose, contextTitle, t }) {
   const [submitting, setSubmitting] = useState(false);
 
   const sendingLabel = t.langToggleHint === "Język" ? "Wysyłanie…" : "Sending…";
+
+
+  useEffect(() => {
+  if (!open) return;
+  let alive = true;
+
+  (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/settings/booking`);
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+      if (alive) setBookingEnabled(!!data.enabled);
+    } catch {
+      // fail-open (don’t block bookings if API call fails)
+      if (alive) setBookingEnabled(true);
+    }
+  })();
+
+  return () => {
+    alive = false;
+  };
+}, [open]);
 
   // Reset form when closing
   useEffect(() => {
@@ -1275,16 +1299,19 @@ function BookingModal({ open, onClose, contextTitle, t }) {
               {dates.map((d) => {
                 const active = pickedDate && pickedDate.getTime() === d.getTime();
                 return (
-                  <button
-                    key={d.toISOString()}
-                    onClick={() => setPickedDate(d)}
-                    className={cx(
-                      "rounded-2xl border px-4 py-3 text-left transition",
-                      active
-                        ? "border-neutral-900 bg-neutral-900 text-white"
-                        : "border-neutral-200 bg-white hover:border-neutral-400"
-                    )}
-                  >
+<button
+  key={d.toISOString()}
+  disabled={!bookingEnabled}
+  onClick={() => bookingEnabled && setPickedDate(d)}
+  className={cx(
+    "rounded-2xl border px-4 py-3 text-left transition",
+    !bookingEnabled ? "opacity-40 cursor-not-allowed" : "",
+    active
+      ? "border-neutral-900 bg-neutral-900 text-white"
+      : "border-neutral-200 bg-white hover:border-neutral-400"
+  )}
+>
+
                     <div className="text-sm font-semibold">{formatDateLabel(d)}</div>
                     <div className="text-xs opacity-70">{t.bookingAvailable}</div>
                   </button>
@@ -1303,22 +1330,24 @@ function BookingModal({ open, onClose, contextTitle, t }) {
                 const active = pickedSlot === s;
 
                 return (
-                  <button
-                    key={s}
-                    disabled={isTaken}
-                    onClick={() => {
-                      if (isTaken) return;
-                      setPickedSlot(s);
-                    }}
-                    className={cx(
-                      "rounded-2xl border px-4 py-3 text-left transition",
-                      isTaken
-                        ? "border-neutral-300 bg-neutral-200 text-neutral-400 cursor-not-allowed"
-                        : active
-                        ? "border-neutral-900 bg-neutral-900 text-white"
-                        : "border-neutral-200 bg-white hover:border-neutral-400"
-                    )}
-                  >
+<button
+  key={s}
+  disabled={isTaken || !bookingEnabled}
+  onClick={() => {
+    if (isTaken || !bookingEnabled) return;
+    setPickedSlot(s);
+  }}
+  className={cx(
+    "rounded-2xl border px-4 py-3 text-left transition",
+    !bookingEnabled ? "opacity-40 cursor-not-allowed" : "",
+    isTaken
+      ? "border-neutral-300 bg-neutral-200 text-neutral-400 cursor-not-allowed"
+      : active
+      ? "border-neutral-900 bg-neutral-900 text-white"
+      : "border-neutral-200 bg-white hover:border-neutral-400"
+  )}
+>
+
                     <div className="text-sm font-semibold">{s}</div>
                     <div className="text-xs opacity-70">
                       {isTaken ? (t.langToggleHint === "Język" ? "Zajęte" : "Booked") : t.bookingDuration}
@@ -1349,12 +1378,24 @@ function BookingModal({ open, onClose, contextTitle, t }) {
               />
               {submitErr ? <p className="text-sm text-red-600">{submitErr}</p> : null}
             </div>
+{!bookingEnabled ? (
+  <div className="rounded-2xl border border-neutral-200 p-4 mb-4 bg-neutral-50">
+    <p className="text-sm font-semibold">
+      {t.langToggleHint === "Język" ? "Rezerwacje są chwilowo wyłączone." : "Bookings are temporarily closed."}
+    </p>
+    <p className="text-xs opacity-70 mt-1">
+      {t.langToggleHint === "Język"
+        ? "Spróbuj ponownie później lub skontaktuj się bezpośrednio."
+        : "Please try again later or contact us directly."}
+    </p>
+  </div>
+) : null}
 
             <div className="mt-6">
               {!confirmed ? (
                 <Button
                   className="rounded-full px-9"
-                  disabled={submitting || !pickedDate || !pickedSlot}
+disabled={submitting || !pickedDate || !pickedSlot || !bookingEnabled}
                   onClick={async () => {
                     if (!pickedDate || !pickedSlot) return;
 
@@ -1766,6 +1807,21 @@ const closeToast = () => setToast((t) => ({ ...t, open: false }));
   const [msgLoading, setMsgLoading] = useState(true);
 
   const token = typeof window !== "undefined" ? localStorage.getItem("ow_admin_token") : null;
+const [bookingEnabled, setBookingEnabled] = useState(true);
+const [bookingBusy, setBookingBusy] = useState(false);
+
+useEffect(() => {
+  let alive = true;
+  (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/settings/booking`);
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+      if (alive) setBookingEnabled(!!data.enabled);
+    } catch {}
+  })();
+  return () => (alive = false);
+}, []);
 
   // Load appointments
   useEffect(() => {
@@ -1814,6 +1870,37 @@ const closeToast = () => setToast((t) => ({ ...t, open: false }));
       alive = false;
     };
   }, [token]);
+const toggleBooking = async () => {
+  try {
+    setBookingBusy(true);
+    const next = !bookingEnabled;
+
+    const res = await fetch(`${API_BASE}/settings/booking`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ enabled: next }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error || "Failed to update");
+
+    setBookingEnabled(!!data.enabled);
+
+    showToast(
+      t.langToggleHint === "Język" ? "Zapisano" : "Saved",
+      next
+        ? (t.langToggleHint === "Język" ? "Rezerwacje włączone." : "Bookings enabled.")
+        : (t.langToggleHint === "Język" ? "Rezerwacje wyłączone." : "Bookings disabled.")
+    );
+  } catch (e) {
+    showToast(t.langToggleHint === "Język" ? "Błąd" : "Error", e.message || "Failed");
+  } finally {
+    setBookingBusy(false);
+  }
+};
 
   const deleteAppt = async (id) => {
     const sure = window.confirm(t.langToggleHint === "Język" ? "Usunąć rezerwację?" : "Delete this appointment?");
@@ -1880,6 +1967,18 @@ const closeToast = () => setToast((t) => ({ ...t, open: false }));
           >
             Back to site
           </Button>
+<Button
+  variant="outline"
+  className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
+  onClick={toggleBooking}
+  disabled={bookingBusy}
+>
+  {bookingBusy
+    ? (t.langToggleHint === "Język" ? "Zapisywanie..." : "Saving...")
+    : bookingEnabled
+    ? (t.langToggleHint === "Język" ? "Wyłącz rezerwacje" : "Disable bookings")
+    : (t.langToggleHint === "Język" ? "Włącz rezerwacje" : "Enable bookings")}
+</Button>
 
           <Button
             variant="outline"
