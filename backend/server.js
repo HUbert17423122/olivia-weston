@@ -8,6 +8,7 @@ import { apptRouter } from "./routes/appointments.js";
 import { pool } from "./db.js";
 import { msgRouter } from "./routes/messages.js";
 
+
 const app = express();
 app.set("trust proxy", 1);
 
