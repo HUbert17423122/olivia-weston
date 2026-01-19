@@ -1667,6 +1667,78 @@ function AdminLoginPage({ dark, onAuthed }) {
     </div>
   );
 }
+function Toast({ open, title, message, onClose, dark }) {
+  useEffect(() => {
+    if (!open) return;
+    const t = setTimeout(onClose, 3200);
+    return () => clearTimeout(t);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed top-6 right-6 z-[9999]">
+      <motion.div
+        initial={{ opacity: 0, y: -12, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -10, scale: 0.98 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className={cx(
+          "w-[min(420px,92vw)] rounded-[1.25rem] border shadow-[0_26px_70px_-40px_rgba(0,0,0,.65)] overflow-hidden",
+          dark ? "bg-[#0f1414] border-white/10 text-white" : "bg-white border-black/10 text-neutral-900"
+        )}
+      >
+        {/* top accent line */}
+        <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
+
+        <div className="p-5 flex gap-4 items-start">
+          {/* icon */}
+          <div
+            className={cx(
+              "mt-0.5 h-10 w-10 rounded-2xl flex items-center justify-center border",
+              dark ? "bg-white/[0.06] border-white/10" : "bg-black/[0.03] border-black/10"
+            )}
+            aria-hidden="true"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M20 6L9 17l-5-5"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div
+              style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }}
+              className="text-[16px] leading-tight"
+            >
+              {title}
+            </div>
+            <div className="text-[13px] opacity-80 mt-1 leading-relaxed whitespace-pre-wrap">
+              {message}
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className={cx(
+              "shrink-0 rounded-full px-3 py-2 text-xs font-semibold border transition",
+              dark
+                ? "border-white/10 hover:bg-white/10"
+                : "border-black/10 hover:bg-black/5"
+            )}
+          >
+            Close
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
 function AdminDashboardPage({ dark, t }) {
 
@@ -1674,6 +1746,43 @@ function AdminDashboardPage({ dark, t }) {
 const [replyText, setReplyText] = useState("");
 const [replySending, setReplySending] = useState(false);
 
+const [toast, setToast] = useState({ open: false, title: "", message: "" });
+
+const showToast = (title, message) => {
+  setToast({ open: true, title, message });
+};
+const replyToMessage = async (id, toEmail, toName, replyText) => {
+  try {
+    const res = await fetch(`${API_BASE}/messages/${id}/reply`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ reply: replyText }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error || "Reply failed");
+
+    showToast(
+      t.langToggleHint === "Język" ? "Wiadomość wysłana" : "Reply sent",
+      t.langToggleHint === "Język"
+        ? `Odpowiedź została wysłana do: ${toEmail}`
+        : `Your reply was sent to: ${toEmail}`
+    );
+
+    return true;
+  } catch (e) {
+    showToast(
+      t.langToggleHint === "Język" ? "Błąd" : "Error",
+      e.message || (t.langToggleHint === "Język" ? "Nie udało się wysłać." : "Failed to send.")
+    );
+    return false;
+  }
+};
+
+const closeToast = () => setToast((t) => ({ ...t, open: false }));
 
   const [items, setItems] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -1801,6 +1910,16 @@ const [replySending, setReplySending] = useState(false);
             Log out
           </Button>
         </div>
+        <AnimatePresence>
+  <Toast
+    open={toast.open}
+    title={toast.title}
+    message={toast.message}
+    onClose={closeToast}
+    dark={dark}
+  />
+</AnimatePresence>
+
       </div>
 
       {/* ================= APPOINTMENTS ================= */}
