@@ -4,22 +4,10 @@ import { requireAdmin } from "../middleware/auth.js";
 
 export const msgRouter = express.Router();
 
-/** Public: create message */
-msgRouter.post("/", async (req, res) => {
-  const { name, email, message } = req.body || {};
-  if (!name || !email || !message) return res.status(400).json({ error: "Missing fields" });
-
-  const out = await pool.query(
-    `INSERT INTO messages (name, email, message)
-     VALUES ($1,$2,$3)
-     RETURNING id, created_at`,
-    [String(name), String(email), String(message)]
-  );
-
-  res.status(201).json({ ok: true, ...out.rows[0] });
-});
-
-/** Admin: list messages */
+/**
+ * Admin: list messages
+ * GET /api/messages
+ */
 msgRouter.get("/", requireAdmin, async (req, res) => {
   const out = await pool.query(
     `SELECT id, name, email, message, created_at
@@ -29,7 +17,30 @@ msgRouter.get("/", requireAdmin, async (req, res) => {
   res.json({ items: out.rows });
 });
 
-/** Admin: delete message */
+/**
+ * Public: create message
+ * POST /api/messages
+ */
+msgRouter.post("/", async (req, res) => {
+  const { name, email, message } = req.body || {};
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: "Missing fields" });
+  }
+
+  const out = await pool.query(
+    `INSERT INTO messages (name, email, message)
+     VALUES ($1,$2,$3)
+     RETURNING id, created_at`,
+    [String(name).trim(), String(email).trim(), String(message).trim()]
+  );
+
+  res.status(201).json({ ok: true, ...out.rows[0] });
+});
+
+/**
+ * Admin: delete message by id
+ * DELETE /api/messages/:id
+ */
 msgRouter.delete("/:id", requireAdmin, async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid id" });
