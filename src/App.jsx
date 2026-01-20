@@ -734,11 +734,11 @@ const I18N = {
       },
       education: {
         noSugarAdults: {
-          title: "No Sugar",
+          title: "No Sugar - Adults",
           blurb: "Understand sugar's impact on energy, mood and health—and reduce it sustainably.",
         },
         noSugarKids: {
-          title: "Whats up Body",
+          title: "No Sugar - Kids",
           blurb: "Support healthier habits with calm guidance instead of restriction.",
         },
         whatsUpBodyKids: {
