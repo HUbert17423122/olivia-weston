@@ -2853,3 +2853,4 @@ export default function AppDesktop() {
     </Shell>
   );
 }
+export { I18N, getInitialLang, buildCategories, buildProducts, BACKGROUNDS };
