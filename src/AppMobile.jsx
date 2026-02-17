@@ -87,7 +87,7 @@ function HeroBackdrop({
         ...(style || {}),
       }}
     >
-      <div className={`absolute left-0 top-0 h-2 w-full bg-gradient-to-r ${accent}`} />
+
 
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.075] mix-blend-overlay"
@@ -286,7 +286,6 @@ function MobileCard({ dark, children, accentLine = true }) {
         dark ? "bg-white/[0.06] border-white/10" : "bg-white/85 border-black/10"
       )}
     >
-      {accentLine ? <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} /> : null}
       <div className="p-5">{children}</div>
     </div>
   );
@@ -688,7 +687,6 @@ function ContactPopupMobile({ open, onOpen, onClose, dark, t }) {
               dark ? "bg-[#0f1414] text-white" : "bg-white text-neutral-900"
             )}
           >
-            <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
 
             <div className={cx("p-5 border-b", dark ? "border-white/10" : "border-black/10")}>
               <div className="flex items-start justify-between gap-4">
