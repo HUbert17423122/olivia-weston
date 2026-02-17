@@ -1543,13 +1543,12 @@ export default function AppMobile() {
         </motion.div>
       </AnimatePresence>
 
-      <BookingModalMobile
-        open={bookingOpen}
-        onClose={() => setBookingOpen(false)}
-        contextTitle={bookingContext}
-        t={t}
-        dark={dark}
-      />
+<BookingModal
+  open={bookingOpen}
+  onClose={() => setBookingOpen(false)}
+  contextTitle={bookingContext}
+  t={t}
+/>
 
       {/* Contact popup only on Education pages (same rule as desktop) */}
       {parsed.page !== "admin_login" &&
