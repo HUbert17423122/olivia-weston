@@ -1,17 +1,18 @@
-// src/AppMobile.jsx
+/* ================= OLIVIA WESTON — MOBILE/TABLET APP =================
+- Reuses your content + data builders from App.jsx
+- Mobile-first layout, better spacing, better cards
+- Bottom-sheet booking & contact on phone
+- Admin dashboard shows items as cards (not wide tables)
+====================================================================== */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-/* ================= IMPORT LOCAL ASSET BACKGROUNDS ================= */
-import bgHome from "./assets/backgrounds/home.jpg";
-import bgYoga from "./assets/backgrounds/yoga.jpg";
-import bgEducation from "./assets/backgrounds/education.jpg";
-import bgWellness from "./assets/backgrounds/wellness.jpg";
+// ✅ Import shared content/builders from your existing App.jsx (no duplication)
+import { I18N, buildCategories, buildProducts } from "./App.jsx";
 
 /* ================= CONFIG ================= */
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080/api";
-
-/* ================= GLOBAL CARD LINE ================= */
 const CARD_LINE = "from-[#aab3c2] via-[#8e97a6] to-[#737d8a]";
 
 function cx(...xs) {
@@ -21,7 +22,7 @@ function cx(...xs) {
 /* ================= BUTTON ================= */
 function Button({ children, className = "", variant, ...props }) {
   const base =
-    "inline-flex items-center justify-center text-[13px] font-semibold transition rounded-full px-5 py-3 select-none focus:outline-none focus:ring-2 focus:ring-offset-2";
+    "inline-flex items-center justify-center text-[13px] sm:text-sm font-semibold transition rounded-full px-5 py-3 select-none focus:outline-none focus:ring-2 focus:ring-offset-2 active:scale-[0.99]";
   const styles =
     variant === "outline"
       ? "border border-white/35 bg-white/10 text-inherit hover:bg-white/15 hover:border-white/45 focus:ring-white/30 focus:ring-offset-transparent"
@@ -35,510 +36,11 @@ function Button({ children, className = "", variant, ...props }) {
   );
 }
 
-/* ================= I18N (copied 1:1 from desktop) ================= */
-const I18N = {
-  pl: {
-    wellnessCatalog: {
-      title: "Wellness",
-      subtitle: "Wybierz zabieg, poznaj szczegóły i umów termin",
-      groups: [
-        {
-          title: "MASAŻE I TERAPIE CIAŁA",
-          items: [
-            {
-              id: "swedish",
-              name: "Swedish massage",
-              desc:
-                "Zanurz się w klasycznym rytmie głębokiego relaksu. Ten masaż, dzięki płynnym, długim pociągnięciom, rozpuści napięcie w każdym mięśniu, ukoi Twój umysł i przywróci wewnętrzną równowagę. Wyjdź z niego odprężony, lekki i pełen energii do życia.",
-              duration: "45 minut",
-            },
-            {
-              id: "integrated",
-              name: "Integrated massage",
-              desc:
-                "To masaż stworzony specjalnie dla Ciebie. Łącząc najlepsze techniki, terapeuta idealnie dopasuje zabieg do Twoich potrzeb – czy to głęboki relaks, czy skupienie na konkretnych dolegliwościach. To holistyczna podróż ku pełni dobrostanu ciała i ducha.",
-              duration: "45 minut",
-            },
-            {
-              id: "lomi",
-              name: "Lomi Lomi massage",
-              desc:
-                "Poczuj na skórze kojący rytm hawajskiej miłości. Długie, płynące jak fala ruchy rąk i przedramion terapeuty usuną napięcia i emocjonalne blokady. To więcej niż masaż – to duchowa podróż, która przywraca harmonię i pozostawia uczucie niezwykłej lekkości.",
-              duration: "45 minut",
-            },
-            {
-              id: "hotstones",
-              name: "Hot stones massage",
-              desc:
-                "Odprężenie, które przenika do samego wnętrza mięśni. Ciepło gładkich, rozgrzanych kamieni głęboko rozluźnia, pozwalając na dotarcie do nawet chronicznego napięcia. Poczuj, jak stres dosłownie wyparowuje z Twojego ciała, pozostawiając błogi stan beztroski.",
-              duration: "45 minut",
-            },
-            {
-              id: "soundbath",
-              name: "Sound bath massage",
-              desc:
-                "Zamknij oczy i daj się ponieść leczącej mocy dźwięku. Wibracje mis, gongów i dzwonków wprowadzą Twój umysł w stan głębokiej medytacji, rozpuszczają stres i przywracają wewnętrzny spokój. To oczyszczająca kąpiel dla Twojej energii, po której poczujesz się odnowiony.",
-              duration: "45 minut",
-            },
-            {
-              id: "headindian",
-              name: "Head Indian massage with energy healing",
-              desc:
-                "Uwolnij umysł i zyskaj kryształową jasność myślenia. Ten dynamiczny masaż głowy, karku i ramion natychmiastowo uśmierza napięciowe bóle głowy. Połączony z uzdrawianiem energetycznym, uwalnia mentalne blokady, pozostawiając uczucie nieziemskiej lekkości i pogody ducha.",
-              duration: "45 minut",
-            },
-            {
-              id: "hopi",
-              name: "Hopi Candles/Coning",
-              desc:
-                "Oczyść uszy i umysł w jednym, niezwykle relaksującym rytuale. Ciepło i delikatny szum herbacianej świecy Hopi łagodzą napięcie w zatokach, uszach i całym systemie nerwowym. To wyjątkowo kojący zabieg, który przynosi ukojenie i wyciszenie.",
-              duration: "45 minut",
-            },
-            {
-              id: "cupping",
-              name: "Chinese fire cupping",
-              desc:
-                "Pozwól swojemu ciału na głęboką detoksykację i regenerację. Zabieg stawia na nogi, zwiększając krążenie, wypłukując toksyny i rozbijając sztywne, obolałe mięśnie. To odwieczna metoda, która przynosi natychmiastową ulgę w bólu pleców, karku i stawów.",
-              duration: "45 minut",
-            },
-            {
-              id: "leeches",
-              name: "Leeches (Hirudotherapy)",
-              desc:
-                "Wykorzystaj mądrość natury dla zdrowia swoich stawów i krążenia. Substancje wydzielane przez pijawki działają jak naturalny, silnie przeciwzapalny i przeciwzakrzepowy \"biokoktajl\". Zabieg wspiera gojenie, redukuje obrzęki i przywraca komfort ruchowy.",
-              duration: "45 minut",
-            },
-            {
-              id: "acupuncture",
-              name: "Acupuncture",
-              desc:
-                "Nasze protokoły celują bezpośrednio w źródło problemu: jeden trwale wycisza przewlekły ból, drugi rozbraja mechanizm uzależnienia. Działając na poziomie fizjologii i psychiki, dają realną szansę na odzyskanie kontroli i życia bez ograniczeń.",
-              duration: "45 minut",
-            },
-          ],
-        },
-        {
-          title: "ZABIEGI NA TWARZ",
-          items: [
-            {
-              id: "skin",
-              name: "Skin facial",
-              desc:
-                "Podstawowy rytuał piękna dla każdego typu cery. Głębokie oczyszczenie, peeling, ekstrakcja i odżywcza maska natychmiast przywracają skórze świeżość i blask. To must-have dla promiennej, zdrowo wyglądającej cery przez cały rok.",
-              duration: "45 minut",
-            },
-            {
-              id: "classic",
-              name: "Classic facial",
-              desc:
-                "Podstawowy rytuał piękna dla każdego typu cery. Głębokie oczyszczenie, peeling, ekstrakcja i odżywcza maska natychmiast przywracają skórze świeżość i blask. To must-have dla promiennej, zdrowo wyglądającej cery przez cały rok.",
-              duration: "45 minut",
-            },
-            {
-              id: "hydrating",
-              name: "Hydrating facial",
-              desc:
-                "Twoja skóra pragnie drinka? Ten zabieg to intensywna kuracja nawadniająca, która wlewa pod powierzchnię skóry potężną dawkę nawilżenia. Natychmiast redukuje uczucie ściągnięcia, wygładza zmarszczki i pozostawia cerę pulchną, miękką i pełną blasku.",
-              duration: "45 minut",
-            },
-            {
-              id: "sensitive",
-              name: "Sensitive skin facial",
-              desc:
-                "Wreszcie poczujesz, co znaczy komfort! Ten ultra-łagodny zabieg, stworzony z myślą o delikatnej cerze, koi zaczerwienienia, wzmacnia barierę ochronną i przynosi ukojenie. Twoja skóra odzyska równowagę, spokój i zdrowy wygląd.",
-              duration: "45 minut",
-            },
-            {
-              id: "luxury",
-              name: "Luxury facial",
-              desc:
-                "Zapraszamy na najwyższą klasę luksusu i skuteczności. To dłuższa, multisensoryczna podróż z elitarnymi kosmetykami, masażem i pielęgnacją strefy dekolt. Zanurz się w absolutnym relaksie i wyjdź z widocznie odmłodzoną, nieskazitelną cerą.",
-              duration: "45 minut",
-            },
-            {
-              id: "hydroderm",
-              name: "Hydrodermabrasion",
-              desc:
-                "Odmładzanie bez inwazji! Strumień tlenu i nawilżających serum delikatnie złuszcza, jednocześnie intensywnie odżywiając skórę. Efekt? Natychmiastowy blask, wyrównany koloryt i gładkość, którą pokochasz. Zero dyskomfortu, zero przestoju.",
-              duration: "45 minut",
-            },
-            {
-              id: "led",
-              name: "LED LIGHT facial",
-              desc:
-                "Twoja skóra zasługuje na światło młodości! Bezbolesna, niesamowicie relaksująca terapia światłem LED zwalcza niedoskonałości, stymuluje produkcję kolagenu i redukuje stany zapalne. To jak kojące słońce, które leczy i odmładza z każdą sesją.",
-              duration: "45 minut",
-            },
-            {
-              id: "microneedling",
-              name: "MICRONEEDLING",
-              desc:
-                "Odkryj moc naturalnej regeneracji! Zabieg aktywuje wewnętrzne siły skóry do produkcji kolagenu, wygładzając blizny, zmarszczki i rozszerzone pory. Twoja cera stanie się gęstsza, gładsza i przygotowana na maksymalne wchłanianie kosmetyków.",
-              duration: "45 minut",
-            },
-            {
-              id: "dermaplaning",
-              name: "Dermaplaning",
-              desc:
-                "Natychmiastowy efekt gładkości i olśniewającego blasku! Zabieg delikatnie usuwa meszek i martwy naskórek, odsłaniając jasną, jak jedwab gładką skórę. Makijaż będzie ложиł się idealnie, a Ty poczujesz się niesamowicie odświeżona.",
-              duration: "45 minut",
-            },
-            {
-              id: "chemicalpeel",
-              name: "Chemical peel",
-              desc:
-                "Odśwież swoją cerę dosłownie jak skórkę! Peeling chemiczny dogłębnie złuszcza, redukując przebarwienia, zmarszczki i blizny. To skuteczny reset dla skóry, który ujawnia jej młodszą, świeższą i bardziej promienną wersję.",
-              duration: "45 minut",
-            },
-            {
-              id: "fatdissolve",
-              name: "Fat dissolve (Injection Lipolysis)",
-              desc:
-                "Pożegnaj się z upartymi oponkami i podbródkiem! Ten niechirurgiczny zabieg precyzyjnie rozbija komórki tłuszczowe w wybranych miejscach, które oparły się diecie. Zyskaj wymarzone kontury ciała bez skalpela i długiej rekonwalescencji.",
-              duration: "45 minut",
-            },
-            {
-              id: "antiwrinkle",
-              name: "Antiwrinkle (Injectable Neuromodulators e.g., Botox)",
-              desc:
-                "Zatrzymaj czas w locie i zachowaj naturalną mimikę. Zabieg delikatnie rozluźnia mięśnie odpowiedzialne za powstawanie zmarszczek mimicznych, wygładzając je i zapobiegając pogłębianiu. Szybko, dyskretnie, efektownie – ciesz się gładkim czołem na co dzień!",
-              duration: "45 minut",
-            },
-          ],
-        },
-      ],
-    },
-    contact: {
-      title: "Napisz do mnie",
-      open: "Kontakt",
-      close: "Zamknij",
-      name: "Imię i nazwisko",
-      email: "Email",
-      message: "Wiadomość",
-      send: "Wyślij",
-      sending: "Wysyłanie…",
-      sent: "Wiadomość wysłana. Dziękuję!",
-      required: "Imię, email i wiadomość są wymagane.",
-    },
-    langToggleHint: "Język",
-    navBrand: "OLIVIA WESTON",
-    footerTagline: "Yoga · Edukacja · Wellness",
-    footerCopyright: (y) => `© ${y} Olivia Weston`,
-    darkToggleLight: "Jasny",
-    darkToggleDark: "Ciemny",
-    admin: "Admin",
-    dashboard: "Panel",
-    open: "Otwórz",
-    back: "Wstecz",
-    backToHome: "Powrót",
-    backTo: (t) => `Powrót do ${t}`,
-    book: "Umów sesję",
-    bookGeneral: "Zapytanie ogólne",
-    browseMore: "Zobacz więcej",
-    bookingTitle: "Rezerwacja",
-    bookingClose: "Zamknij",
-    bookingSelectDay: "Wybierz dzień",
-    bookingSelectTime: "Wybierz godzinę",
-    bookingAvailable: "Dostępne",
-    bookingDuration: "45 minut",
-    bookingConfirm: "Wyślij",
-    bookingSent: (d, s) => `Prośba wysłana: ${d}, ${s}.`,
-    bookingProdNote:
-      "Zgłoszenie zostało zapisane w systemie. W wersji produkcyjnej można dodać e-mail/CRM/powiadomienia.",
-    formName: "Imię i nazwisko",
-    formPhone: "Telefon",
-    formEmail: "Email (opcjonalnie)",
-    formRequiredErr: "Imię i telefon są wymagane.",
-    homeHeroTitle: "Olivia Weston",
-    homeHeroSubtitle:
-      "Yoga, edukacja i wellness — z uważnością, spokojem i jasną strukturą. Wybierz ścieżkę i poznaj szczegóły bez informacyjnego chaosu.",
-    homeHeroMeta: "Yoga · Edukacja · Wellness",
-    homeQuoteBand:
-      "Prosta struktura tworzy spokój — dzięki temu łatwiej wybrać to, co naprawdę Cię wspiera.",
-    subProductsTitle: "Dostępne produkty",
-    subProductsSub: "Wybrane propozycje dopasowane do tego obszaru.",
-    noProducts: "Brak produktów dla tego obszaru.",
-    productImageAlt: "Miejsce na zdjęcie produktu",
-    view: "Zobacz",
-    quote: {
-      wellness_home:
-        "„Zdrowie wymaga stanu równowagi między wpływami środowiska, sposobem życia oraz różnymi elementami ludzkiej natury.” — Hipokrates",
-      education: "„Niechaj pożywienie będzie lekarstwem, a lekarstwo pożywieniem.” — Hipokrates",
-      yoga_1: "To co zewnętrzne, zależy od wewnętrznego.",
-      yoga_2: "Świadomy ruch jest najlepszym lekarstwem człowieka.",
-      yoga_2_en: "“Conscious movement is our greatest remedy.”",
-    },
-    copy: {
-      yogaIntro:
-        "Witaj w przestrzeni, gdzie joga jest dialogiem duszy z ciałem. Jestem Olivia– moja wieloletnia praktyka to nie zawód, a powołanie serca. Towarzyszę dorosłym w odnajdywaniu wewnętrznej siły, dzieciom w budowaniu uważnej radości, a przyszłym matkom w świętym przygotowaniu do narodzin. Moją misją jest być przewodniczką na Twojej własnej ścieżce powrotu do ciszy, mocy i lekkości, które już w Tobie mieszkają. Zapraszam Cię do wspólnego oddychania, czucia i odkrywania.",
-      educationIntro:
-        "Wspólnie stworzymy bezpieczną przestrzeń, w której odzyskasz uważność i zaufanie do siebie. Pomogę Ci usłyszeć sygnały Twojego ciała, byś mógł/mogła wziąć pełną odpowiedzialność za swoje wybory i zbudować trwałe, dobre nawyki.",
-      wellnessIntro:
-        "Głęboko w Tobie jest pragnienie nie tylko tego, aby dobrze wyglądać — ale przede wszystkim, aby czuć lekkość, witalność i pełną harmonię ze sobą. Holistyczna troska o ciało i umysł to jedna z najpiękniejszych inwestycji w zdrowie: wspiera równowagę, regenerację i codzienne poczucie spokoju.",
-      noSugarAdults:
-        "Przedstawiam program edukacyjny „No Sugar” – „The Sugar Trap”, który bada wpływ cukru na organizm człowieka, a także na dobrostan fizyczny i psychiczny.\n\nTreść prezentacji opiera się na powszechnie dostępnych informacjach oraz zaleceniach żywieniowych upowszechnianych przez lekarzy, dietetyków i wiarygodne źródła medialne oraz literaturze przedmiotu. Program ma charakter wyłącznie informacyjno-edukacyjny i w żadnym wypadku nie stanowi porady lekarskiej, diagnostycznej ani terapeutycznej. W przypadku konkretnych problemów zdrowotnych należy zawsze skonsultować się z lekarzem lub wykwalifikowanym specjalistą.\n\nKompleksowy program koncentruje się na roli węglowodanów w diecie, ujawnia ilość cukru ukrytego w codziennym pożywieniu oraz uczy, jak praktycznie rozróżniać cukry proste i złożone, aby świadomie dokonywać lepszych wyborów żywieniowych.\n\nZapraszam do udziału w programie:\n\n· Dla Ciebie – grupa dla dorosłych\n· Dla Twojej organizacji – warsztaty dla firm lub grup.\n· Pakiet „Extra dla Rodziny” – obejmujący 5 sesji: pierwszą dla rodziców, a kolejne cztery tematyczne zajęcia edukacyjne dla dzieci, budujące zdrowe nawyki od najmłodszych lat.",
-      noSugarKids:
-        "Podczas naszej przygody odkryjemy, skąd czerpiemy energię do zabawy i nauki oraz co sprawia, że ją tracimy. Dowiemy się, co dzieje się w naszym ciele, dlaczego czasem czujemy się zmęczeni lub markotni, i jak być detektywem podczas wyboru posiłków. Moja specjalna prezentacja pokaże wam te wszystkie sekrety w zabawnej i prostej formie. Dzięki niej zostaniecie prawdziwymi tropicielami cukru – nauczycie się rozpoznawać, gdzie się on chowa w produktach, i jak wybierać mądrze, by być pełnym siły.",
-      whatsUpBodyKids:
-        "Przedstawiam dziecięcy program edukacyjny „What's Up Body?” – „Moje ciało wysyła wiadomości”.\n\nTreść tego programu została opracowana w oparciu o powszechnie dostępne, odpowiednie wiekowo materiały edukacyjne o ludzkim ciele i zdrowiu, zgodne z podstawami programowymi edukacji zdrowotnej w przedszkolach i szkołach podstawowych. Zawiera ogólną wiedzę promowaną przez pediatrów i wiarygodne organizacje zajmujące się zdrowiem dzieci.\n\nNależy wyraźnie podkreślić, że program ma wyłącznie charakter edukacyjny, profilaktyczny i zabawowy. Jego celem jest wyposażenie dzieci w podstawową wiedzę i słownictwo, a w żadnym wypadku nie stanowi porady medycznej, diagnozy ani rekomendacji terapeutycznej. Program nie zachęca do samodiagnozy ani leczenia. Jego głównym celem jest budowanie otwartej komunikacji między dziećmi a ich rodzicami lub opiekunami prawnymi. Wszelkie wątpliwości dotyczące zdrowia dziecka należy zawsze omawiać z wykwalifikowanym personelem medycznym, takim jak pediatra lub pielęgniarka.\n\nTen kompleksowy program ma na celu pielęgnowanie naturalnej ciekawości dzieci, ucząc je w angażujący i dostosowany do wieku sposób, jak rozpoznawać niezwykłe sygnały wysyłane przez ich ciała. Poprzez interaktywne warsztaty skupiamy się na:\n\n· Budowaniu świadomości ciała: Pomaganie dzieciom w identyfikacji i nazywaniu powszechnych odczuć cielesnych (np. „motylki w brzuszku”, „ból brzucha”, „gorąca głowa”, „zmęczone mięśnie”).\n· Tworzeniu mostu komunikacyjnego: Wyposażanie dzieci w zrozumienie znaczenia mówienia zaufanej osobie dorosłej – rodzicowi, opiekunowi lub nauczycielowi – kiedy czują się „inaczej niż zwykle”.\n· Podstawach profilaktyki: Wprowadzenie prostej idei, że zwracanie uwagi na to, jak się czujemy, jest pierwszym krokiem w dbaniu o siebie, zachęcając do rozwijania trwałego nawyku świadomości zdrowotnej.\n\nZapraszam do udziału w programie:\n\n· Dla Twojego dziecka/grupy: Angażujące warsztaty dla dzieci w grupach wiekowych.\n· Dla Twojej instytucji: Dostosowane sesje dla żłobków, szkół, świetlic i klubów dziecięcych.",
-      whatsUpBodyAdults:
-        "Przedstawiam program edukacyjny „What's Up Body” – „Objawy nie mają wieku”.\n\nTreść prezentacji została opracowana w oparciu o powszechnie dostępne i wiarygodne źródła, w tym informacje upowszechniane przez środowisko medyczne, publikacje z zakresu medycyny stylu życia oraz literaturę naukowo-popularyzacyjną. Należy podkreślić, że program ma charakter wyłącznie informacyjno-edukacyjny i nie zastępuje w żadnym zakresie konsultacji z lekarzem. Nie stanowi porady lekarskiej, diagnozy ani rekomendacji terapeutycznej. Wszelkie decyzje dotyczące zdrowia, leczenia lub zmiany trybu życia należy podejmować wyłącznie po konsultacji z odpowiednim lekarzem lub wykwalifikowanym specjalistą.\n\nCelem tego kompleksowego programu jest rozwój świadomości własnego ciała oraz umiejętności uważnego wsłuchiwania się w wysyłane przez nie sygnały. Skupia się on na kluczowej roli prewencji i profilaktyki zdrowotnej, której zadaniem jest wczesne rozpoznawanie niepokojących objawów, zrozumienie ich kontekstu oraz świadome podejmowanie działań sprzyjających zdrowiu, co może pomóc w uniknięciu poważniejszych konsekwencji w przyszłości.\n\nZapraszam do udziału w programie:\n\n· Dla Ciebie – grupa dla dorosłych.\n· Dla Twojej organizacji – np.: dla grup seniorów, klubów, stowarzyszeń lub innych zorganizowanych środowisk.",
-      noUPFAdults:
-        "Przedstawiam program edukacyjny „No UPF” – „Ultra-przetworzone żywności i ich wpływ na zdrowie”.\n\nProgram oparty jest na aktualnej wiedzy naukowej dotyczącej ultra-przetworzonych produktów żywnościowych (UPF). Zawiera informacje o ich składzie, potencjalnym wpływie na zdrowie metaboliczne i ogólne samopoczucie, zgodnie z publikacjami w renomowanych czasopismach medycznych i żywieniowych.\n\nNależy wyraźnie zaznaczyć, że program ma charakter wyłącznie edukacyjny i informacyjny. Nie stanowi porady dietetycznej, lekarskiej ani rekomendacji żywieniowej. Nie zachęca do eliminacji konkretnych produktów, lecz dąży do dostarczenia wiedzy umożliwiającej świadome wybory konsumenckie.\n\nCelem programu jest:\n· Zrozumienie, czym są ultra-przetworzone produkty żywnościowe (UPF).\n· Nauka czytania etykiet i identyfikowania UPF w codziennej diecie.\n· Poznanie potencjalnych konsekwencji zdrowotnych związanych z wysokim spożyciem UPF.\n· Wypracowanie praktycznych strategii na bardziej świadome i zrównoważone podejście do wyborów żywieniowych.\n\nZapraszam do udziału w programie:\n\n· Dla Ciebie – warsztaty dla dorosłych.\n· Dla Twojej firmy/zespołu – sesje edukacyjne w miejscu pracy.",
-      toxFree:
-        "Zapraszamy do programu „Tox Free” – kompleksowego spotkania o chemii w Twoim codziennym życiu.\n\nPrzedstawimy rzetelny przegląd dostępnej wiedzy na temat wpływu popularnych produktów, takich jak świece, odświeżacze powietrza czy detergenty, na Twoje zdrowie.\n\nDodatkowo, w sposób obiektywny poruszymy tematykę dymu tytoniowego oraz aerozolu z papierosów elektronicznych o tym jak oddziaływują na organizm.\n\nCelem programu jest dostarczenie Państwu skompensowanej, faktograficznej wiedzy, która umożliwi świadomą ocenę ryzyka.\n\nProgram ma wyłącznie charakter edukacyjny i informacyjny, nie służy diagnozowaniu, leczeniu ani promocji konkretnych produktów.\n\nZdobyta wiedza pozwoli Państwu podejmować bardziej przemyślane decyzje dla zdrowia swojego i swoich bliskich.\n\nZapraszam do udziału w programie:\n\n· Dla Ciebie – indywidualne sesje lub małe grupy.\n· Dla Twojej organizacji – warsztaty dla firm, instytucji lub społeczności.",
-    },
-    categories: {
-      yoga: { title: "Yoga", subtitle: "Ruch terapeutyczny" },
-      education: { title: "Edukacja", subtitle: "Świadome wybory" },
-      wellness: { title: "Wellness", subtitle: "Holistyczna równowaga" },
-    },
-    subtopics: {
-      yoga: {
-        kids: { title: "Joga terapeutyczna dla dzieci", blurb: "Yoga Kids to więcej niż tylko ruch. To zajęcia, które rosną razem z Twoim dzieckiem..." },
-        adults: { title: "Joga terapeutyczna dla dorosłych", blurb: "Odkryj moc klasycznej jogi z elementami jogi Nidry..." },
-        seniors: { title: "Joga terapeutyczna dla seniorów", blurb: "Odpowiadając na Twoje potrzeby, stworzę jogę dla seniorów..." },
-      },
-      education: {
-        noSugarAdults: { title: "Bez cukru – dorośli", blurb: "Zrozum wpływ węglowodanów na energię, nastrój i zdrowie — i odzyskaj kontrolę..." },
-        noSugarKids: { title: "Bez cukru – dzieci", blurb: "Zabawna i prosta edukacja: skąd mamy energię..." },
-        whatsUpBodyKids: { title: "What's Up Body – dzieci", blurb: "Program edukacyjny dla dzieci: „Moje ciało wysyła wiadomości”..." },
-        whatsUpBodyAdults: { title: "What's Up Body – dorośli", blurb: "Program edukacyjny: „Objawy nie mają wieku”..." },
-        noUPFAdults: { title: "No UPF – dorośli", blurb: "Program o ultra-przetworzonej żywności (UPF)..." },
-        toxFree: { title: "Tox Free", blurb: "Program o chemii w codziennym życiu..." },
-      },
-      wellness: {
-        bodyMind: { title: "Ciało i umysł", blurb: "Narzędzia wspierające relaks, regenerację i równowagę..." },
-        release: { title: "Uwolnienie", blurb: "Produkty wspierające rozluźnienie napięć..." },
-        beauty: { title: "Piękno", blurb: "Rytuały i produkty podkreślające naturalne piękno..." },
-      },
-    },
-    subBlocks: {
-      educationDefault: [{ title: "Bezpieczna przestrzeń", textKey: "educationIntro" }],
-      noSugarAdults: [{ title: "Bez cukru — dorośli", textKey: "noSugarAdults" }],
-      noSugarKids: [{ title: "Bez cukru — dzieci", textKey: "noSugarKids" }],
-      whatsUpBodyKids: [{ title: "What's Up Body – dzieci", textKey: "whatsUpBodyKids" }],
-      whatsUpBodyAdults: [{ title: "What's Up Body – dorośli", textKey: "whatsUpBodyAdults" }],
-      noUPFAdults: [{ title: "No UPF – dorośli", textKey: "noUPFAdults" }],
-      toxFree: [{ title: "Tox Free", textKey: "toxFree" }],
-      yoga: [{ title: "Praktyka", textKey: "yogaIntro" }],
-      wellness: [{ title: "Równowaga", text: "Wellness to codzienna, łagodna troska o siebie..." }],
-    },
-    products: {
-      p1: { title: "Olejek regenerujący do ciała", tone: "Głębokie ukojenie" },
-      p2: { title: "Świeca aromaterapeutyczna", tone: "Uziemienie i ciepło" },
-      p3: { title: "Sole do kąpieli z magnezem", tone: "Rozluźnienie mięśni" },
-      p4: { title: "Roller do masażu", tone: "Ulga dla napięć" },
-      p5: { title: "Gua sha do twarzy", tone: "Delikatny lifting" },
-      p6: { title: "Serum nawilżające", tone: "Codzienny blask" },
-    },
-  },
-
-  en: {
-    wellnessCatalog: {
-      title: "Wellness",
-      subtitle: "Choose a treatment, explore details, and book",
-      groups: [], // keep as-is; your desktop has full EN too
-    },
-    contact: {
-      title: "Contact me",
-      open: "Contact",
-      close: "Close",
-      name: "Full name",
-      email: "Email",
-      message: "Message",
-      send: "Send",
-      sending: "Sending…",
-      sent: "Message sent. Thank you!",
-      required: "Name, email and message are required.",
-    },
-    langToggleHint: "Language",
-    navBrand: "OLIVIA WESTON",
-    footerTagline: "Yoga · Education · Wellness",
-    footerCopyright: (y) => `© ${y} Olivia Weston`,
-    darkToggleLight: "Light",
-    darkToggleDark: "Dark",
-    admin: "Admin",
-    dashboard: "Dashboard",
-    open: "Open",
-    back: "Back",
-    backToHome: "Back to home",
-    backTo: (t) => `Back to ${t}`,
-    book: "Book a session",
-    bookGeneral: "General enquiry",
-    browseMore: "Browse more",
-    bookingTitle: "Book a session",
-    bookingClose: "Close",
-    bookingSelectDay: "Select a day",
-    bookingSelectTime: "Select a time",
-    bookingAvailable: "Available",
-    bookingDuration: "45 minutes",
-    bookingConfirm: "Send",
-    bookingSent: (d, s) => `Request sent for ${d} at ${s}.`,
-    bookingProdNote: "Request saved. In production, you can add email/CRM notifications.",
-    formName: "Full name",
-    formPhone: "Phone",
-    formEmail: "Email (optional)",
-    formRequiredErr: "Name and phone are required.",
-    homeHeroTitle: "Olivia Weston",
-    homeHeroSubtitle:
-      "Yoga, education and wellness—delivered with calm clarity and thoughtful structure. Choose a path to explore services without information overload.",
-    homeHeroMeta: "Yoga · Education · Wellness",
-    homeQuoteBand: "Simple structure creates calm—so you can choose what supports you.",
-    subProductsTitle: "Available products",
-    subProductsSub: "Curated items aligned with this focus.",
-    noProducts: "No products listed for this focus yet.",
-    productImageAlt: "Product image placeholder",
-    view: "View",
-    quote: {
-      wellness_home:
-        "“Health requires a state of balance between environmental influences, lifestyle, and the various elements of human nature.” — Hippocrates",
-      education: "“Let your food be your medicine, and let your medicine be your food.” — Hippocrates",
-      yoga_1: "What is external depends on what is internal.",
-      yoga_2: "“Conscious movement is our greatest remedy.”",
-    },
-    copy: {
-      yogaIntro:
-        "Welcome to a space where yoga is a dialogue between the soul and the body. I am Olivia– for me, yoga is not a profession, but a calling of the heart...",
-      educationIntro:
-        "Together, we will create a safe space where you will regain mindfulness and trust in yourself...",
-      wellnessIntro:
-        "Deep down, you desire not only to look good — you yearn to feel light, vital, and in complete harmony with yourself...",
-      noSugarAdults: "The Sugar Trap\n\nI present the educational programme \"No Sugar\" – \"The Sugar Trap\"...",
-      noSugarKids:
-        "During our adventure, we will discover where we get the energy for play and learning...",
-      whatsUpBodyKids:
-        "Educational Programme: \"What's Up Body?\" - \"My Body Sends Messages\"...",
-      whatsUpBodyAdults:
-        "I present the educational program \"What's Up Body\" – \"Symptoms Have No Age\"...",
-      noUPFAdults:
-        "I present the educational programme \"No UPF\" – \"Ultra-processed foods and their impact on health\"...",
-      toxFree:
-        "You are invited to the \"Tox Free\" program – a comprehensive meeting about chemistry in your daily life...",
-    },
-    categories: {
-      yoga: { title: "Yoga", subtitle: "Therapeutic movement" },
-      education: { title: "Education", subtitle: "Informed guidance" },
-      wellness: { title: "Wellness", subtitle: "Holistic self-care" },
-    },
-    subtopics: {
-      yoga: {
-        kids: { title: "Yoga Kids", blurb: "Yoga Kids – More Than Just Movement..." },
-        adults: { title: "Yoga Adults", blurb: "Classic Yoga enriched with deep Nidra practice..." },
-        seniors: { title: "Yoga Seniors", blurb: "In response to your needs, I will create a seniors' yoga practice..." },
-      },
-      education: {
-        noSugarAdults: { title: "No Sugar - Adults", blurb: "Understand sugar's impact on energy, mood and health..." },
-        noSugarKids: { title: "No Sugar - Kids", blurb: "Support healthier habits with calm guidance..." },
-        whatsUpBodyKids: { title: "What's Up Body – Kids", blurb: "Educational program for children..." },
-        whatsUpBodyAdults: { title: "What's Up Body – Adults", blurb: "Educational program: 'Symptoms Have No Age'..." },
-        noUPFAdults: { title: "No UPF – Adults", blurb: "Program about ultra-processed foods (UPF)..." },
-        toxFree: { title: "Tox Free", blurb: "Program about chemistry in daily life..." },
-      },
-      wellness: {
-        bodyMind: { title: "Body & Mind", blurb: "Tools that support relaxation..." },
-        release: { title: "Release", blurb: "Products designed to ease tension..." },
-        beauty: { title: "Beauty", blurb: "Rituals and products that enhance natural beauty..." },
-      },
-    },
-    subBlocks: {
-      educationDefault: [{ title: "Safe space", textKey: "educationIntro" }],
-      noSugarAdults: [{ title: "No sugar — adults", textKey: "noSugarAdults" }],
-      noSugarKids: [{ title: "No sugar — kids", textKey: "noSugarKids" }],
-      whatsUpBodyKids: [{ title: "What's Up Body — kids", textKey: "whatsUpBodyKids" }],
-      whatsUpBodyAdults: [{ title: "What's Up Body — adults", textKey: "whatsUpBodyAdults" }],
-      noUPFAdults: [{ title: "No UPF — adults", textKey: "noUPFAdults" }],
-      toxFree: [{ title: "Tox Free", textKey: "toxFree" }],
-      yoga: [{ title: "Practice", textKey: "yogaIntro" }],
-      wellness: [{ title: "Balance", text: "Wellness is daily, gentle care..." }],
-    },
-    products: {
-      p1: { title: "Restorative Body Oil", tone: "Deeply calming" },
-      p2: { title: "Aromatherapy Candle", tone: "Grounding warmth" },
-      p3: { title: "Magnesium Bath Salts", tone: "Muscle release" },
-      p4: { title: "Massage Roller", tone: "Tension relief" },
-      p5: { title: "Facial Gua Sha", tone: "Gentle lift" },
-      p6: { title: "Hydrating Serum", tone: "Daily glow" },
-    },
-  },
-};
-
+/* ================= HELPERS ================= */
 function getInitialLang() {
   const saved = typeof window !== "undefined" ? window.localStorage.getItem("ow_lang") : null;
   if (saved === "pl" || saved === "en") return saved;
   return "pl";
-}
-
-/* ================= LOCAL ASSET BACKGROUNDS MAP ================= */
-const BACKGROUNDS = {
-  home: bgHome,
-  yoga: bgYoga,
-  education: bgEducation,
-  wellness: bgWellness,
-};
-
-/* ================= DATA BUILDERS ================= */
-function buildCategories(t) {
-  return [
-    {
-      key: "yoga",
-      title: t.categories.yoga.title,
-      subtitle: t.categories.yoga.subtitle,
-      quote: t.quote.yoga_2,
-      description: t.copy.yogaIntro,
-      accent: "from-[#8fb8ae] via-[#7aa89f] to-[#6b988f]",
-      heroImage: BACKGROUNDS.yoga,
-      children: [
-        { key: "kids", title: t.subtopics.yoga.kids.title, blurb: t.subtopics.yoga.kids.blurb, route: "#/yoga/kids" },
-        { key: "adults", title: t.subtopics.yoga.adults.title, blurb: t.subtopics.yoga.adults.blurb, route: "#/yoga/adults" },
-        { key: "seniors", title: t.subtopics.yoga.seniors.title, blurb: t.subtopics.yoga.seniors.blurb, route: "#/yoga/seniors" },
-      ],
-    },
-    {
-      key: "education",
-      title: t.categories.education.title,
-      subtitle: t.categories.education.subtitle,
-      quote: t.quote.education,
-      description: t.copy.educationIntro,
-      accent: "from-[#aab3c2] via-[#8e97a6] to-[#737d8a]",
-      heroImage: BACKGROUNDS.education,
-      children: [
-        { key: "no-sugar-adults", title: t.subtopics.education.noSugarAdults.title, blurb: t.subtopics.education.noSugarAdults.blurb, route: "#/education/no-sugar-adults" },
-        { key: "no-sugar-kids", title: t.subtopics.education.noSugarKids.title, blurb: t.subtopics.education.noSugarKids.blurb, route: "#/education/no-sugar-kids" },
-        { key: "whats-up-body-kids", title: t.subtopics.education.whatsUpBodyKids.title, blurb: t.subtopics.education.whatsUpBodyKids.blurb, route: "#/education/whats-up-body-kids" },
-        { key: "whats-up-body-adults", title: t.subtopics.education.whatsUpBodyAdults.title, blurb: t.subtopics.education.whatsUpBodyAdults.blurb, route: "#/education/whats-up-body-adults" },
-        { key: "no-upf-adults", title: t.subtopics.education.noUPFAdults.title, blurb: t.subtopics.education.noUPFAdults.blurb, route: "#/education/no-upf-adults" },
-        { key: "tox-free", title: t.subtopics.education.toxFree.title, blurb: t.subtopics.education.toxFree.blurb, route: "#/education/tox-free" },
-      ],
-    },
-    {
-      key: "wellness",
-      title: t.categories.wellness.title,
-      subtitle: t.categories.wellness.subtitle,
-      quote: t.quote.wellness_home,
-      description: t.copy.wellnessIntro,
-      accent: "from-[#c7b8a8] via-[#a48f7c] to-[#8a7461]",
-      heroImage: BACKGROUNDS.wellness,
-      children: [
-        { key: "body-mind", title: t.subtopics.wellness.bodyMind.title, blurb: t.subtopics.wellness.bodyMind.blurb, route: "#/wellness/body-mind" },
-        { key: "release", title: t.subtopics.wellness.release.title, blurb: t.subtopics.wellness.release.blurb, route: "#/wellness/release" },
-        { key: "beauty", title: t.subtopics.wellness.beauty.title, blurb: t.subtopics.wellness.beauty.blurb, route: "#/wellness/beauty" },
-      ],
-    },
-  ];
-}
-
-const WELLNESS_PRODUCTS_BASE = [
-  { id: "p1", price: "£24", for: "body-mind" },
-  { id: "p2", price: "£18", for: "body-mind" },
-  { id: "p3", price: "£16", for: "release" },
-  { id: "p4", price: "£20", for: "release" },
-  { id: "p5", price: "£14", for: "beauty" },
-  { id: "p6", price: "£28", for: "beauty" },
-];
-
-function buildProducts(t) {
-  return WELLNESS_PRODUCTS_BASE.map((p) => ({ ...p, title: t.products[p.id].title, tone: t.products[p.id].tone }));
 }
 
 /* ================= HASH ROUTER ================= */
@@ -565,15 +67,8 @@ function NavLink({ to, children, className }) {
 }
 
 /* ================= MOBILE SHELL ================= */
-function MobileShell({ dark, onToggleDark, lang, onToggleLang, t, children }) {
+function ShellMobile({ dark, onToggleDark, lang, onToggleLang, t, children }) {
   const token = typeof window !== "undefined" ? localStorage.getItem("ow_admin_token") : null;
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const onHash = () => setMenuOpen(false);
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
 
   return (
     <div
@@ -583,6 +78,7 @@ function MobileShell({ dark, onToggleDark, lang, onToggleLang, t, children }) {
       )}
       style={{
         fontFamily: 'var(--ow-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, Roboto, Arial',
+        paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
       <style>{`
@@ -595,114 +91,110 @@ function MobileShell({ dark, onToggleDark, lang, onToggleLang, t, children }) {
         a{ text-decoration: none; }
       `}</style>
 
-      {/* Top bar */}
-      <header className="max-w-7xl mx-auto px-4 pt-3">
-        <div className="flex items-center justify-between gap-3">
-          <NavLink
-            to="#/"
-            className={cx(
-              "tracking-[0.16em] text-[11px] uppercase transition",
-              "opacity-90 hover:opacity-100",
-              "whitespace-nowrap",
-              dark ? "text-white" : "text-neutral-900"
-            )}
-            style={{ fontFamily: "var(--ow-sans)" }}
-          >
-            {t.navBrand}
-          </NavLink>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              onClick={() => setMenuOpen((v) => !v)}
-              className={cx("rounded-full px-3 py-2 text-[12px]", dark ? "hover:bg-white/10" : "hover:bg-black/5")}
+      {/* NAV */}
+      <header className="max-w-6xl mx-auto px-4 sm:px-6 pt-3">
+        <div
+          className={cx(
+            "rounded-2xl border backdrop-blur",
+            dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10"
+          )}
+        >
+          <div className="flex items-center justify-between gap-2 px-4 py-3">
+            <NavLink
+              to="#/"
+              className={cx(
+                "tracking-[0.16em] text-[10px] sm:text-xs uppercase transition",
+                "opacity-90 hover:opacity-100 whitespace-nowrap"
+              )}
+              style={{ fontFamily: "var(--ow-sans)" }}
             >
-              {menuOpen ? "Close" : "Menu"}
-            </Button>
-          </div>
-        </div>
+              {t.navBrand}
+            </NavLink>
 
-        {/* Dropdown menu */}
-        {menuOpen ? (
-          <div
-            className={cx(
-              "mt-3 rounded-2xl border overflow-hidden",
-              dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10"
-            )}
-          >
-            <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
-
-            <div className="p-3 flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <div
+            <div className="flex items-center gap-2">
+              {/* Lang toggle */}
+              <div
+                className={cx(
+                  "inline-flex items-center rounded-full border overflow-hidden",
+                  dark ? "bg-white/5 border-white/10" : "bg-white/70 border-black/10"
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={() => onToggleLang("pl")}
+                  aria-pressed={lang === "pl"}
                   className={cx(
-                    "inline-flex items-center rounded-full border overflow-hidden",
-                    dark ? "bg-white/5 border-white/10" : "bg-white/70 border-black/10"
+                    "px-3 py-2 text-[12px] font-semibold transition",
+                    lang === "pl"
+                      ? "bg-neutral-900 text-white"
+                      : dark
+                      ? "text-white/80 hover:bg-white/10"
+                      : "text-neutral-900/80 hover:bg-black/5"
                   )}
                 >
-                  <button
-                    type="button"
-                    onClick={() => onToggleLang("pl")}
-                    aria-pressed={lang === "pl"}
-                    className={cx(
-                      "px-3 py-2 text-[12px] font-semibold transition",
-                      lang === "pl"
-                        ? "bg-neutral-900 text-white"
-                        : dark
-                        ? "text-white/80 hover:bg-white/10"
-                        : "text-neutral-900/80 hover:bg-black/5"
-                    )}
-                  >
-                    PL
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onToggleLang("en")}
-                    aria-pressed={lang === "en"}
-                    className={cx(
-                      "px-3 py-2 text-[12px] font-semibold transition",
-                      lang === "en"
-                        ? "bg-neutral-900 text-white"
-                        : dark
-                        ? "text-white/80 hover:bg-white/10"
-                        : "text-neutral-900/80 hover:bg-black/5"
-                    )}
-                  >
-                    EN
-                  </button>
-                </div>
-
-                <Button
-                  variant="ghost"
-                  onClick={onToggleDark}
-                  className={cx("rounded-full px-3 py-2 text-[12px]", dark ? "hover:bg-white/10" : "hover:bg-black/5")}
+                  PL
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onToggleLang("en")}
+                  aria-pressed={lang === "en"}
+                  className={cx(
+                    "px-3 py-2 text-[12px] font-semibold transition",
+                    lang === "en"
+                      ? "bg-neutral-900 text-white"
+                      : dark
+                      ? "text-white/80 hover:bg-white/10"
+                      : "text-neutral-900/80 hover:bg-black/5"
+                  )}
                 >
-                  {dark ? t.darkToggleLight : t.darkToggleDark}
-                </Button>
+                  EN
+                </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                <NavLink to="#/" className="inline-flex">
-                  <Button variant="outline" className={cx("w-full rounded-full", dark ? "" : "border-black/10 bg-white")}>
-                    Home
-                  </Button>
-                </NavLink>
+              {/* Dark */}
+              <button
+                onClick={onToggleDark}
+                className={cx(
+                  "rounded-full border px-3 py-2 text-[12px] font-semibold transition",
+                  dark ? "border-white/10 hover:bg-white/10" : "border-black/10 hover:bg-black/5"
+                )}
+              >
+                {dark ? t.darkToggleLight : t.darkToggleDark}
+              </button>
 
-                <NavLink to={token ? "#/admin/dashboard" : "#/admin/login"} className="inline-flex">
-                  <Button variant="outline" className={cx("w-full rounded-full", dark ? "" : "border-black/10 bg-white")}>
-                    {token ? t.dashboard : t.admin}
-                  </Button>
+              {/* Admin */}
+              {token ? (
+                <NavLink to="#/admin/dashboard" className="inline-flex">
+                  <button
+                    className={cx(
+                      "rounded-full border px-3 py-2 text-[12px] font-semibold transition",
+                      dark ? "border-white/10 hover:bg-white/10" : "border-black/10 bg-white hover:bg-black/5"
+                    )}
+                  >
+                    {t.dashboard}
+                  </button>
                 </NavLink>
-              </div>
+              ) : (
+                <NavLink to="#/admin/login" className="inline-flex">
+                  <button
+                    className={cx(
+                      "rounded-full border px-3 py-2 text-[12px] font-semibold transition",
+                      dark ? "border-white/10 hover:bg-white/10" : "border-black/10 bg-white hover:bg-black/5"
+                    )}
+                  >
+                    {t.admin}
+                  </button>
+                </NavLink>
+              )}
             </div>
           </div>
-        ) : null}
+        </div>
       </header>
 
       {children}
 
-      <footer className="max-w-7xl mx-auto px-5 py-10 opacity-70 text-sm">
-        <div className="flex flex-col gap-2">
+      <footer className="max-w-6xl mx-auto px-4 sm:px-6 py-10 opacity-70 text-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <p className="tracking-tight">{t.footerTagline}</p>
           <p className="tracking-tight">{t.footerCopyright(new Date().getFullYear())}</p>
         </div>
@@ -711,12 +203,13 @@ function MobileShell({ dark, onToggleDark, lang, onToggleLang, t, children }) {
   );
 }
 
-/* ================= HERO BACKDROP (mobile tuned) ================= */
+/* ================= HERO BACKDROP ================= */
 function HeroBackdrop({ bgImage, dark, accent, style, children }) {
   return (
     <div
-      className="relative overflow-hidden min-h-[860px]"
+      className="relative overflow-hidden"
       style={{
+        minHeight: "860px",
         ...(bgImage
           ? {
               backgroundImage: `url("${bgImage}")`,
@@ -730,25 +223,34 @@ function HeroBackdrop({ bgImage, dark, accent, style, children }) {
     >
       <div className={`absolute left-0 top-0 h-2 w-full bg-gradient-to-r ${accent}`} />
 
-      <div className={dark ? "absolute inset-0 bg-black/55" : "absolute inset-0 bg-white/30"} />
+      <div className={dark ? "absolute inset-0 bg-black/45" : "absolute inset-0 bg-white/20"} />
       <div
         className={
           dark
-            ? "absolute inset-0 bg-gradient-to-b from-black/65 via-black/35 to-[#0b0f0f]"
-            : "absolute inset-0 bg-gradient-to-b from-white/80 via-white/30 to-[#f5f7f7]"
+            ? "absolute inset-0 bg-gradient-to-b from-black/70 via-black/25 to-black/10"
+            : "absolute inset-0 bg-gradient-to-b from-white/85 via-white/30 to-white/10"
         }
       />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(255,255,255,0.25),transparent_65%)]" />
 
       <div className="relative z-10">{children}</div>
+
+      <div
+        className={
+          dark
+            ? "pointer-events-none absolute bottom-0 left-0 right-0 h-44 bg-gradient-to-b from-transparent via-[#0b0f0f]/55 to-[#0b0f0f]"
+            : "pointer-events-none absolute bottom-0 left-0 right-0 h-44 bg-gradient-to-b from-transparent via-[#f5f7f7]/65 to-[#f5f7f7]"
+        }
+      />
     </div>
   );
 }
 
-/* ================= HERO (mobile tuned) ================= */
-function Hero({ title, subtitle, primary, secondary }) {
+/* ================= MOBILE HERO ================= */
+function HeroMobile({ title, subtitle, primary, secondary }) {
   return (
-    <section className="relative overflow-hidden">
-      <div className="relative z-10 max-w-7xl mx-auto px-5 pt-10 pb-6">
+    <section className="relative">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-6">
         <div className="max-w-xl">
           <motion.h1
             initial={{ y: 18, opacity: 0 }}
@@ -759,15 +261,17 @@ function Hero({ title, subtitle, primary, secondary }) {
               fontFamily: "var(--ow-display)",
               letterSpacing: "-0.03em",
               fontWeight: 650,
-              fontSize: "clamp(34px, 8.5vw, 54px)",
+              fontSize: "clamp(34px, 9vw, 58px)",
             }}
           >
             {title}
           </motion.h1>
 
-          <p className="text-[14px] opacity-85 leading-relaxed mb-6">{subtitle}</p>
+          <p className="text-[14px] sm:text-[15px] opacity-85 leading-relaxed mb-6 tracking-[-0.01em]">
+            {subtitle}
+          </p>
 
-          <div className="flex flex-col gap-3 items-stretch">
+          <div className="flex flex-col gap-3 items-start">
             {primary}
             {secondary}
           </div>
@@ -777,11 +281,11 @@ function Hero({ title, subtitle, primary, secondary }) {
   );
 }
 
-/* ================= INFO GRID (always 1 col on mobile) ================= */
-function InfoGrid({ items, dark, t }) {
+/* ================= MOBILE GRID ================= */
+function InfoGridMobile({ items, dark, t }) {
   return (
-    <section className="max-w-7xl mx-auto px-5 pb-10">
-      <div className="grid grid-cols-1 gap-5">
+    <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {items.map((it) => (
           <motion.div
             key={it.to}
@@ -792,12 +296,11 @@ function InfoGrid({ items, dark, t }) {
             <NavLink to={it.to} className="block h-full">
               <div
                 className={cx(
-                  "h-full rounded-[1.6rem] overflow-hidden flex flex-col border shadow-[0_18px_45px_-32px_rgba(0,0,0,.55)]",
-                  dark ? "bg-white/[0.06] backdrop-blur border-white/10" : "bg-white/0 backdrop-blur border-black/10"
+                  "h-full rounded-[1.6rem] overflow-hidden flex flex-col border shadow-[0_18px_50px_-38px_rgba(0,0,0,.55)]",
+                  dark ? "bg-white/[0.06] backdrop-blur border-white/10" : "bg-white/80 backdrop-blur border-black/10"
                 )}
               >
                 <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
-
                 <div className="p-6 flex flex-col h-full">
                   <div className="flex-1">
                     <h3
@@ -812,11 +315,17 @@ function InfoGrid({ items, dark, t }) {
                       {it.title}
                     </h3>
 
-                    {it.meta ? <p className="text-[11px] uppercase tracking-[0.22em] opacity-60 mb-3">{it.meta}</p> : null}
+                    {it.meta ? (
+                      <p className="text-[10px] uppercase tracking-[0.22em] opacity-60 mb-3">
+                        {it.meta}
+                      </p>
+                    ) : null}
 
-                    {it.quote ? <p className="text-[13px] italic opacity-80 leading-relaxed mb-3">{it.quote}</p> : null}
+                    {it.quote ? (
+                      <p className="text-[13px] italic opacity-80 leading-relaxed mb-3">{it.quote}</p>
+                    ) : null}
 
-                    <p className="text-[13px] opacity-85 leading-relaxed">{it.desc}</p>
+                    <p className="text-[13.5px] opacity-85 leading-relaxed tracking-[-0.01em]">{it.desc}</p>
                   </div>
 
                   <div className="mt-6 inline-flex items-center gap-2 text-sm opacity-85">
@@ -833,12 +342,13 @@ function InfoGrid({ items, dark, t }) {
   );
 }
 
-function QuoteBand({ quote }) {
+function QuoteBandMobile({ quote }) {
   return (
-    <section className="py-8 relative overflow-hidden">
-      <div className="relative z-10 max-w-5xl mx-auto px-5 text-center">
+    <section className="py-6 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(142,151,166,0.16),transparent_60%)]" />
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 text-center">
         <motion.p
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
@@ -847,7 +357,7 @@ function QuoteBand({ quote }) {
             fontFamily: "var(--ow-display)",
             letterSpacing: "-0.02em",
             fontWeight: 600,
-            fontSize: "clamp(18px, 5vw, 26px)",
+            fontSize: "clamp(18px, 4.6vw, 28px)",
           }}
         >
           {quote}
@@ -857,7 +367,7 @@ function QuoteBand({ quote }) {
   );
 }
 
-/* ================= BOOKING MODAL (mobile: bottom-sheet feel) ================= */
+/* ================= BOOKING MODAL (BOTTOM SHEET) ================= */
 function nextDays(count) {
   const out = [];
   const d = new Date();
@@ -876,7 +386,7 @@ function formatDateISO(d) {
   return d.toISOString().slice(0, 10);
 }
 
-function BookingModal({ open, onClose, contextTitle, t }) {
+function BookingModalMobile({ open, onClose, contextTitle, t }) {
   const dates = useMemo(() => nextDays(14), []);
   const slots = useMemo(() => ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"], []);
 
@@ -908,28 +418,25 @@ function BookingModal({ open, onClose, contextTitle, t }) {
       }
     })();
 
-    return () => {
-      alive = false;
-    };
+    return () => (alive = false);
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !pickedDate) return;
     let alive = true;
 
     (async () => {
       try {
         const qs = new URLSearchParams({
-          date: pickedDate ? formatDateISO(pickedDate) : "",
+          date: formatDateISO(pickedDate),
           context: contextTitle || "",
         });
 
         const res = await fetch(`${API_BASE}/appointments/availability?${qs.toString()}`);
         const data = await res.json();
-        if (!res.ok) throw new Error();
+        if (!res.ok) throw new Error(data?.error || "Failed to load availability");
 
         if (!alive) return;
-
         const taken = Array.isArray(data.taken) ? data.taken : [];
         setTakenSlots(taken);
 
@@ -942,10 +449,7 @@ function BookingModal({ open, onClose, contextTitle, t }) {
       }
     })();
 
-    return () => {
-      alive = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => (alive = false);
   }, [open, pickedDate, contextTitle]);
 
   useEffect(() => {
@@ -965,21 +469,30 @@ function BookingModal({ open, onClose, contextTitle, t }) {
 
   if (!open) return null;
 
+  const sendingLabel = t.langToggleHint === "Język" ? "Wysyłanie…" : "Sending…";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/45" onClick={onClose} />
 
       <motion.div
-        initial={{ opacity: 0, y: 22 }}
+        initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative w-full max-w-[720px] rounded-t-[2rem] bg-white shadow-[0_40px_120px_-60px_rgba(0,0,0,.7)] overflow-hidden"
+        className={cx(
+          "relative w-full sm:w-[min(920px,92vw)] bg-white overflow-hidden shadow-[0_40px_120px_-60px_rgba(0,0,0,.7)]",
+          "rounded-t-[2rem] sm:rounded-[2rem]",
+          "max-h-[92vh] sm:max-h-[86vh]"
+        )}
       >
-        <div className="p-5 border-b border-neutral-200 flex items-start justify-between gap-4">
+        <div className="p-5 sm:p-8 border-b border-neutral-200 flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <h3 style={{ fontFamily: "var(--ow-display)", fontWeight: 650 }} className="text-xl">
+            <h3
+              style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }}
+              className="text-xl sm:text-2xl truncate"
+            >
               {t.bookingTitle}
             </h3>
-            <p className="text-xs opacity-70 mt-1 truncate">{contextTitle}</p>
+            <p className="text-xs sm:text-sm opacity-70 mt-1 truncate">{contextTitle}</p>
           </div>
 
           <Button variant="ghost" onClick={onClose} className="hover:bg-black/5">
@@ -987,11 +500,11 @@ function BookingModal({ open, onClose, contextTitle, t }) {
           </Button>
         </div>
 
-        <div className="p-5 grid gap-6 max-h-[78vh] overflow-auto">
-          {/* Dates */}
+        <div className="p-5 sm:p-8 grid sm:grid-cols-2 gap-6 overflow-auto">
+          {/* DAY */}
           <div>
-            <p className="text-[11px] uppercase tracking-[0.22em] opacity-60 mb-3">{t.bookingSelectDay}</p>
-            <div className="grid grid-cols-2 gap-3">
+            <p className="text-[10px] uppercase tracking-[0.22em] opacity-60 mb-3">{t.bookingSelectDay}</p>
+            <div className="grid grid-cols-2 gap-2">
               {dates.map((d) => {
                 const active = pickedDate && pickedDate.getTime() === d.getTime();
                 return (
@@ -1008,17 +521,18 @@ function BookingModal({ open, onClose, contextTitle, t }) {
                     )}
                   >
                     <div className="text-sm font-semibold">{formatDateLabel(d)}</div>
-                    <div className="text-xs opacity-70">{t.bookingAvailable}</div>
+                    <div className="text-[11px] opacity-70">{t.bookingAvailable}</div>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Time */}
+          {/* TIME + FORM */}
           <div>
-            <p className="text-[11px] uppercase tracking-[0.22em] opacity-60 mb-3">{t.bookingSelectTime}</p>
-            <div className="grid grid-cols-2 gap-3">
+            <p className="text-[10px] uppercase tracking-[0.22em] opacity-60 mb-3">{t.bookingSelectTime}</p>
+
+            <div className="grid grid-cols-2 gap-2">
               {slots.map((s) => {
                 const isTaken = takenSlots.includes(s);
                 const active = pickedSlot === s;
@@ -1042,36 +556,39 @@ function BookingModal({ open, onClose, contextTitle, t }) {
                     )}
                   >
                     <div className="text-sm font-semibold">{s}</div>
-                    <div className="text-xs opacity-70">{isTaken ? (t.langToggleHint === "Język" ? "Zajęte" : "Booked") : t.bookingDuration}</div>
+                    <div className="text-[11px] opacity-70">
+                      {isTaken ? (t.langToggleHint === "Język" ? "Zajęte" : "Booked") : t.bookingDuration}
+                    </div>
                   </button>
                 );
               })}
             </div>
-          </div>
 
-          {/* Form */}
-          <div className="grid gap-3">
-            <input className="rounded-2xl border border-neutral-200 px-4 py-3" placeholder={t.formName} value={name} onChange={(e) => setName(e.target.value)} />
-            <input className="rounded-2xl border border-neutral-200 px-4 py-3" placeholder={t.formPhone} value={phone} onChange={(e) => setPhone(e.target.value)} />
-            <input className="rounded-2xl border border-neutral-200 px-4 py-3" placeholder={t.formEmail} value={email} onChange={(e) => setEmail(e.target.value)} />
-            {submitErr ? <p className="text-sm text-red-600">{submitErr}</p> : null}
-          </div>
-
-          {!bookingEnabled ? (
-            <div className="rounded-2xl border border-neutral-200 p-4 bg-neutral-50">
-              <p className="text-sm font-semibold">
-                {t.langToggleHint === "Język" ? "Rezerwacje są chwilowo wyłączone." : "Bookings are temporarily closed."}
-              </p>
-              <p className="text-xs opacity-70 mt-1">
-                {t.langToggleHint === "Język" ? "Spróbuj ponownie później lub skontaktuj się bezpośrednio." : "Please try again later or contact us directly."}
-              </p>
+            <div className="mt-4 grid gap-2">
+              <input
+                className="rounded-2xl border border-neutral-200 px-4 py-3"
+                placeholder={t.formName}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <input
+                className="rounded-2xl border border-neutral-200 px-4 py-3"
+                placeholder={t.formPhone}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+              <input
+                className="rounded-2xl border border-neutral-200 px-4 py-3"
+                placeholder={t.formEmail}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {submitErr ? <p className="text-sm text-red-600">{submitErr}</p> : null}
             </div>
-          ) : null}
 
-          <div className="pb-2">
             {!confirmed ? (
               <Button
-                className="rounded-full w-full py-4"
+                className="rounded-full w-full mt-4 py-4"
                 disabled={submitting || !pickedDate || !pickedSlot || !bookingEnabled}
                 onClick={async () => {
                   if (!pickedDate || !pickedSlot) return;
@@ -1098,15 +615,25 @@ function BookingModal({ open, onClose, contextTitle, t }) {
                       }),
                     });
 
-                    const data = await res.json().catch(() => ({}));
+                    const data = await res.json();
 
                     if (res.status === 409) {
                       setSubmitErr(t.langToggleHint === "Język" ? "Ten termin jest już zajęty." : "This slot is already booked.");
+
+                      const qs = new URLSearchParams({
+                        date: formatDateISO(pickedDate),
+                        context: contextTitle || "",
+                      });
+                      const r2 = await fetch(`${API_BASE}/appointments/availability?${qs.toString()}`);
+                      const d2 = await r2.json();
+                      const taken = Array.isArray(d2.taken) ? d2.taken : [];
+                      setTakenSlots(taken);
+                      const firstFree = slots.find((x) => !taken.includes(x)) || null;
+                      setPickedSlot(firstFree);
                       return;
                     }
 
                     if (!res.ok) throw new Error(data?.error || "Failed to submit");
-
                     setConfirmed(true);
                   } catch (e) {
                     setSubmitErr(e.message || "Failed to submit");
@@ -1115,10 +642,10 @@ function BookingModal({ open, onClose, contextTitle, t }) {
                   }
                 }}
               >
-                {submitting ? (t.langToggleHint === "Język" ? "Wysyłanie…" : "Sending…") : t.bookingConfirm}
+                {submitting ? sendingLabel : t.bookingConfirm}
               </Button>
             ) : (
-              <div className="rounded-2xl border border-neutral-200 p-4">
+              <div className="rounded-2xl border border-neutral-200 p-4 mt-4">
                 <p className="text-sm">
                   {t.bookingSent(pickedDate ? formatDateLabel(pickedDate) : "", pickedSlot || "")}
                 </p>
@@ -1132,8 +659,8 @@ function BookingModal({ open, onClose, contextTitle, t }) {
   );
 }
 
-/* ================= CONTACT POPUP (mobile bottom sheet) ================= */
-function ContactPopup({ open, onOpen, onClose, dark, t }) {
+/* ================= CONTACT POPUP (BOTTOM SHEET) ================= */
+function ContactPopupMobile({ open, onOpen, onClose, dark, t }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -1154,35 +681,39 @@ function ContactPopup({ open, onOpen, onClose, dark, t }) {
 
   return (
     <>
-      <div className="fixed bottom-5 right-5 z-40">
+      <div className="fixed bottom-[calc(16px+env(safe-area-inset-bottom))] right-4 z-40">
         {!open ? (
-          <Button className="rounded-full px-6 py-4 shadow-[0_22px_55px_-35px_rgba(0,0,0,.55)]" onClick={onOpen}>
+          <Button className="rounded-full px-6 py-4" onClick={onOpen}>
             {t.contact.open}
           </Button>
         ) : null}
       </div>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/45" onClick={onClose} />
 
           <motion.div
-            initial={{ opacity: 0, y: 22 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             className={cx(
-              "relative w-full max-w-[720px] rounded-t-[2rem] overflow-hidden shadow-[0_40px_120px_-60px_rgba(0,0,0,.7)]",
+              "relative w-full sm:w-[min(560px,92vw)] overflow-hidden shadow-[0_40px_120px_-60px_rgba(0,0,0,.7)]",
+              "rounded-t-[2rem] sm:rounded-[2rem]",
               dark ? "bg-[#0f1414] text-white" : "bg-white text-neutral-900"
             )}
           >
             <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
 
-            <div className={cx("p-5 border-b", dark ? "border-white/10" : "border-black/10")}>
+            <div className={cx("p-5 sm:p-7 border-b", dark ? "border-white/10" : "border-black/10")}>
               <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 style={{ fontFamily: "var(--ow-display)", fontWeight: 650 }} className="text-xl">
+                <div className="min-w-0">
+                  <h3
+                    style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }}
+                    className="text-xl sm:text-2xl truncate"
+                  >
                     {t.contact.title}
                   </h3>
-                  <p className="text-xs opacity-70 mt-1">Education</p>
+                  <p className="text-xs sm:text-sm opacity-70 mt-1">Education</p>
                 </div>
 
                 <Button variant="ghost" onClick={onClose} className={dark ? "hover:bg-white/10" : "hover:bg-black/5"}>
@@ -1191,16 +722,22 @@ function ContactPopup({ open, onOpen, onClose, dark, t }) {
               </div>
             </div>
 
-            <div className="p-5 grid gap-3 max-h-[78vh] overflow-auto">
+            <div className="p-5 sm:p-7 grid gap-2">
               <input
-                className={cx("rounded-2xl px-4 py-3 border outline-none", dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10")}
+                className={cx(
+                  "rounded-2xl px-4 py-3 border outline-none",
+                  dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10"
+                )}
                 placeholder={t.contact.name}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
 
               <input
-                className={cx("rounded-2xl px-4 py-3 border outline-none", dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10")}
+                className={cx(
+                  "rounded-2xl px-4 py-3 border outline-none",
+                  dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10"
+                )}
                 placeholder={t.contact.email}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -1208,7 +745,7 @@ function ContactPopup({ open, onOpen, onClose, dark, t }) {
 
               <textarea
                 className={cx(
-                  "rounded-2xl px-4 py-3 border outline-none min-h-[130px] resize-none",
+                  "rounded-2xl px-4 py-3 border outline-none min-h-[120px] resize-none",
                   dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10"
                 )}
                 placeholder={t.contact.message}
@@ -1220,7 +757,7 @@ function ContactPopup({ open, onOpen, onClose, dark, t }) {
 
               {!sent ? (
                 <Button
-                  className="rounded-full w-full py-4 mt-1"
+                  className="rounded-full w-full mt-2 py-4"
                   disabled={sending}
                   onClick={async () => {
                     setErr("");
@@ -1240,7 +777,7 @@ function ContactPopup({ open, onOpen, onClose, dark, t }) {
                           message: message.trim(),
                         }),
                       });
-                      const data = await res.json().catch(() => ({}));
+                      const data = await res.json();
                       if (!res.ok) throw new Error(data?.error || "Failed to send");
                       setSent(true);
                     } catch (e) {
@@ -1265,18 +802,23 @@ function ContactPopup({ open, onOpen, onClose, dark, t }) {
   );
 }
 
-/* ================= ADMIN PAGES (same logic, mobile widths) ================= */
-function AdminLoginPage({ dark, onAuthed }) {
+/* ================= ADMIN (MOBILE FRIENDLY) ================= */
+function AdminLoginPageMobile({ dark, onAuthed }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 
   return (
-    <div className="max-w-7xl mx-auto px-5 py-10">
-      <div className={cx("max-w-lg rounded-[2rem] border p-7 overflow-hidden", dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10")}>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+      <div
+        className={cx(
+          "rounded-[1.6rem] border p-6 sm:p-10 overflow-hidden",
+          dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10"
+        )}
+      >
         <div className={cx("h-[5px] w-full rounded-full mb-6 bg-gradient-to-r", CARD_LINE)} />
-        <h1 style={{ fontFamily: "var(--ow-display)", fontWeight: 650 }} className="text-2xl mb-1">
+        <h1 style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }} className="text-2xl sm:text-3xl mb-2">
           Admin Login
         </h1>
         <p className="text-sm opacity-75 mb-6">Sign in to manage bookings.</p>
@@ -1285,7 +827,10 @@ function AdminLoginPage({ dark, onAuthed }) {
           <div>
             <label className="text-xs uppercase tracking-[0.22em] opacity-60">Email</label>
             <input
-              className={cx("mt-2 w-full rounded-2xl px-4 py-3 border outline-none", dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10")}
+              className={cx(
+                "mt-2 w-full rounded-2xl px-4 py-3 border outline-none",
+                dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10"
+              )}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="username"
@@ -1295,7 +840,10 @@ function AdminLoginPage({ dark, onAuthed }) {
           <div>
             <label className="text-xs uppercase tracking-[0.22em] opacity-60">Password</label>
             <input
-              className={cx("mt-2 w-full rounded-2xl px-4 py-3 border outline-none", dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10")}
+              className={cx(
+                "mt-2 w-full rounded-2xl px-4 py-3 border outline-none",
+                dark ? "bg-white/[0.06] border-white/10" : "bg-white border-black/10"
+              )}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
@@ -1316,7 +864,7 @@ function AdminLoginPage({ dark, onAuthed }) {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ email, password }),
                 });
-                const data = await res.json().catch(() => ({}));
+                const data = await res.json();
                 if (!res.ok) throw new Error(data?.error || "Login failed");
                 localStorage.setItem("ow_admin_token", data.token);
                 onAuthed();
@@ -1342,12 +890,15 @@ function AdminLoginPage({ dark, onAuthed }) {
   );
 }
 
-function AdminDashboardPage({ dark, t }) {
-  const token = typeof window !== "undefined" ? localStorage.getItem("ow_admin_token") : null;
-
+function AdminDashboardPageMobile({ dark, t }) {
   const [items, setItems] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
+  const [msgErr, setMsgErr] = useState("");
+  const [msgLoading, setMsgLoading] = useState(true);
+
+  const token = typeof window !== "undefined" ? localStorage.getItem("ow_admin_token") : null;
 
   useEffect(() => {
     let alive = true;
@@ -1358,7 +909,7 @@ function AdminDashboardPage({ dark, t }) {
         const res = await fetch(`${API_BASE}/appointments`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json().catch(() => ({}));
+        const data = await res.json();
         if (!res.ok) throw new Error(data?.error || "Failed to load appointments");
         if (alive) setItems(data.items || []);
       } catch (e) {
@@ -1367,67 +918,215 @@ function AdminDashboardPage({ dark, t }) {
         if (alive) setLoading(false);
       }
     })();
-    return () => {
-      alive = false;
-    };
+    return () => (alive = false);
   }, [token]);
 
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      setMsgLoading(true);
+      setMsgErr("");
+      try {
+        const resM = await fetch(`${API_BASE}/messages`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const dataM = await resM.json();
+        if (!resM.ok) throw new Error(dataM?.error || "Failed to load messages");
+        if (alive) setMessages(dataM.items || []);
+      } catch (e) {
+        if (alive) setMsgErr(e.message || "Failed to load messages");
+      } finally {
+        if (alive) setMsgLoading(false);
+      }
+    })();
+    return () => (alive = false);
+  }, [token]);
+
+  const deleteAppt = async (id) => {
+    const sure = window.confirm(t.langToggleHint === "Język" ? "Usunąć rezerwację?" : "Delete this appointment?");
+    if (!sure) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/appointments/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Delete failed");
+      setItems((prev) => prev.filter((x) => x.id !== id));
+    } catch (e) {
+      alert(e.message || "Delete failed");
+    }
+  };
+
+  const deleteMessage = async (id) => {
+    const sure = window.confirm(t.langToggleHint === "Język" ? "Usunąć wiadomość?" : "Delete this message?");
+    if (!sure) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/messages/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Delete failed");
+      setMessages((prev) => prev.filter((x) => x.id !== id));
+    } catch (e) {
+      alert(e.message || "Delete failed");
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-5 py-10">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
       <div className="flex items-center justify-between gap-3 mb-6">
         <div>
-          <h1 style={{ fontFamily: "var(--ow-display)", fontWeight: 650 }} className="text-2xl">
+          <h1 style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }} className="text-2xl sm:text-3xl">
             {t.dashboard}
           </h1>
           <p className="text-sm opacity-75">Manage booking requests.</p>
         </div>
 
-        <Button
-          variant="outline"
-          className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
-          onClick={() => {
-            localStorage.removeItem("ow_admin_token");
-            window.location.hash = "#/admin/login";
-          }}
-        >
-          Log out
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
+            onClick={() => (window.location.hash = "#/")}
+          >
+            Back
+          </Button>
+          <Button
+            variant="outline"
+            className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
+            onClick={() => {
+              localStorage.removeItem("ow_admin_token");
+              window.location.hash = "#/admin/login";
+            }}
+          >
+            Log out
+          </Button>
+        </div>
       </div>
 
-      <div className={cx("rounded-[2rem] border overflow-hidden", dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10")}>
+      {/* APPOINTMENTS */}
+      <div
+        className={cx(
+          "rounded-[1.6rem] border overflow-hidden",
+          dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10"
+        )}
+      >
         <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
+        <div className="p-5">
+          <h2 style={{ fontFamily: "var(--ow-display)", fontWeight: 650 }} className="text-xl">
+            {t.langToggleHint === "Język" ? "Rezerwacje" : "Bookings"}
+          </h2>
+          <p className="text-sm opacity-75 mt-1">
+            {t.langToggleHint === "Język" ? "Lista zgłoszeń rezerwacji." : "List of booking requests."}
+          </p>
+        </div>
 
         {loading ? (
-          <div className="p-6 opacity-80">Loading…</div>
+          <div className="p-5 opacity-80">Loading…</div>
         ) : err ? (
-          <div className="p-6 text-red-400">{err}</div>
+          <div className="p-5 text-red-400">{err}</div>
         ) : (
           <div className="p-5 grid gap-3">
             {items.map((it) => (
               <div
                 key={it.id}
-                className={cx("rounded-2xl border p-4", dark ? "border-white/10 bg-white/[0.04]" : "border-black/10 bg-white")}
+                className={cx(
+                  "rounded-2xl border p-4",
+                  dark ? "border-white/10 bg-white/[0.04]" : "border-black/10 bg-white"
+                )}
               >
-                <div className="text-sm font-semibold">{it.name}</div>
-                <div className="text-xs opacity-75 mt-1">
-                  {it.date} • {it.time}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold">{it.name}</div>
+                    <div className="text-xs opacity-75 mt-1">
+                      {it.date} · {it.time}
+                    </div>
+                    <div className="text-xs opacity-70 mt-2">
+                      {it.phone} {it.email ? `· ${it.email}` : ""}
+                    </div>
+                    <div className="text-xs opacity-70 mt-2">
+                      {t.langToggleHint === "Język" ? "Kontekst: " : "Context: "}
+                      {it.context || "-"}
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
+                    onClick={() => deleteAppt(it.id)}
+                  >
+                    {t.langToggleHint === "Język" ? "Usuń" : "Delete"}
+                  </Button>
                 </div>
-                <div className="text-xs opacity-75 mt-1">{it.phone}</div>
-                {it.context ? <div className="text-xs opacity-70 mt-2">{it.context}</div> : null}
               </div>
             ))}
 
-            {items.length === 0 ? <div className="opacity-70 text-sm">No booking requests yet.</div> : null}
+            {items.length === 0 ? (
+              <div className="opacity-70 text-sm">
+                {t.langToggleHint === "Język" ? "Brak rezerwacji." : "No bookings yet."}
+              </div>
+            ) : null}
+          </div>
+        )}
+      </div>
 
-            <div className="pt-2">
-              <Button
-                variant="outline"
-                className={cx("rounded-full w-full", dark ? "" : "border-black/10 bg-white")}
-                onClick={() => (window.location.hash = "#/")}
+      {/* MESSAGES */}
+      <div className="mt-6" />
+
+      <div
+        className={cx(
+          "rounded-[1.6rem] border overflow-hidden",
+          dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10"
+        )}
+      >
+        <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
+        <div className="p-5">
+          <h2 style={{ fontFamily: "var(--ow-display)", fontWeight: 650 }} className="text-xl">
+            {t.langToggleHint === "Język" ? "Wiadomości" : "Messages"}
+          </h2>
+          <p className="text-sm opacity-75 mt-1">
+            {t.langToggleHint === "Język" ? "Wiadomości z formularza kontaktowego." : "Messages from contact form."}
+          </p>
+        </div>
+
+        {msgLoading ? (
+          <div className="p-5 opacity-80">Loading…</div>
+        ) : msgErr ? (
+          <div className="p-5 text-red-400">{msgErr}</div>
+        ) : (
+          <div className="p-5 grid gap-3">
+            {messages.map((m) => (
+              <div
+                key={m.id}
+                className={cx(
+                  "rounded-2xl border p-4",
+                  dark ? "border-white/10 bg-white/[0.04]" : "border-black/10 bg-white"
+                )}
               >
-                Back to site
-              </Button>
-            </div>
+                <div className="text-sm font-semibold">{m.name}</div>
+                <div className="text-xs opacity-75 mt-1">{m.email}</div>
+                <div className="text-sm opacity-85 mt-3 whitespace-pre-wrap">{m.message}</div>
+
+                <div className="mt-3 flex justify-end">
+                  <Button
+                    variant="outline"
+                    className={cx("rounded-full", dark ? "" : "border-black/10 bg-white")}
+                    onClick={() => deleteMessage(m.id)}
+                  >
+                    {t.langToggleHint === "Język" ? "Usuń" : "Delete"}
+                  </Button>
+                </div>
+              </div>
+            ))}
+
+            {messages.length === 0 ? (
+              <div className="opacity-70 text-sm">
+                {t.langToggleHint === "Język" ? "Brak wiadomości." : "No messages yet."}
+              </div>
+            ) : null}
           </div>
         )}
       </div>
@@ -1436,33 +1135,49 @@ function AdminDashboardPage({ dark, t }) {
 }
 
 /* ================= PUBLIC PAGES ================= */
-function HomePage({ onBook, dark, t, categories }) {
+function HomePageMobile({ onBook, dark, t, categories }) {
+  const homeBg = categories?.[0]?.heroImage ? null : null; // unused; home has its own
   return (
-    <div className="pb-6">
+    <div className="pb-4">
       <HeroBackdrop
-        bgImage={BACKGROUNDS.home}
+        bgImage={categories?.[0]?.heroImage ? null : null}
         dark={dark}
         accent="from-[#8fb8ae] via-[#7aa89f] to-[#6b988f]"
-        style={{ backgroundPosition: "center 35%" }}
+        // We don't have BACKGROUNDS here; categories are built with heroImage, home not included.
+        // So we use your Home page content without needing background here:
+        style={{
+          backgroundImage: "none",
+        }}
       >
-        <div className="max-w-7xl mx-auto">
-          <Hero
+        {/* Mobile home needs the original home background. Use a safe trick: */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("${getHomeBackgroundFromCategories(categories)}")`,
+            backgroundSize: "cover",
+            backgroundPosition: "center 35%",
+            opacity: 1,
+          }}
+        />
+        <div className="absolute inset-0" style={{ background: dark ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.2)" }} />
+        <div className="relative z-10">
+          <HeroMobile
             title={t.homeHeroTitle}
             subtitle={t.homeHeroSubtitle}
             primary={
-              <Button className="rounded-full w-full py-4" onClick={() => onBook(t.bookGeneral)}>
+              <Button className="rounded-full px-10 py-4" onClick={() => onBook(t.bookGeneral)}>
                 {t.book}
               </Button>
             }
             secondary={
-              <div className="flex items-center justify-center gap-3 text-sm opacity-80 px-2">
+              <div className="flex items-center gap-3 text-sm opacity-80 px-1">
                 <span className={cx("h-px w-10", dark ? "bg-white/30" : "bg-neutral-300")} />
                 <span className="tracking-tight">{t.homeHeroMeta}</span>
               </div>
             }
           />
 
-          <InfoGrid
+          <InfoGridMobile
             t={t}
             dark={dark}
             items={categories.map((c) => ({
@@ -1474,139 +1189,166 @@ function HomePage({ onBook, dark, t, categories }) {
             }))}
           />
 
-          <QuoteBand quote={t.homeQuoteBand} />
+          <QuoteBandMobile quote={t.homeQuoteBand} />
         </div>
       </HeroBackdrop>
     </div>
   );
 }
 
-function WellnessCatalogPage({ category, onBook, dark, t }) {
+// Helper: safely grab your home background from your existing images
+function getHomeBackgroundFromCategories(categories) {
+  // Your App.jsx uses BACKGROUNDS.home. We can infer it by looking at the yoga/edu/wellness images?
+  // Best: Use the same trick as App.jsx: the home background is always the one used on home.
+  // Since we can’t import assets here without duplicating, simplest: read from DOM if you set it.
+  // But we want it reliable: in your project, home.jpg lives at /src/assets/backgrounds/home.jpg
+  // Vite can resolve it by URL:
+  try {
+    return new URL("./assets/backgrounds/home.jpg", import.meta.url).toString();
+  } catch {
+    return "";
+  }
+}
+
+function WellnessCatalogPageMobile({ category, onBook, dark, t }) {
   const quote = t.quote.wellness_home;
   const groups = t.wellnessCatalog?.groups || [];
 
   return (
-    <div className="pb-10">
-      <HeroBackdrop bgImage={category.heroImage} dark={dark} accent={category.accent} style={{ backgroundPosition: "center 47%" }}>
-        <div className="max-w-7xl mx-auto px-5">
-          <Hero
-            title={t.wellnessCatalog?.title || category.title}
-            subtitle={t.wellnessCatalog?.subtitle || category.description}
-            primary={
-              <NavLink to="#/" className="inline-flex w-full">
-                <Button className="rounded-full w-full py-4">{t.backToHome}</Button>
-              </NavLink>
-            }
-            secondary={
-              <div className="flex items-center justify-center gap-3 text-sm opacity-80 px-2">
-                <span className={cx("h-px w-10", dark ? "bg-white/30" : "bg-neutral-300")} />
-                <span className="tracking-tight">{category.subtitle}</span>
-              </div>
-            }
-          />
+    <div className="pb-8">
+      <HeroBackdrop
+        bgImage={category.heroImage}
+        dark={dark}
+        accent={category.accent}
+        style={{ backgroundPosition: "center 47%" }}
+      >
+        <HeroMobile
+          title={t.wellnessCatalog?.title || category.title}
+          subtitle={t.wellnessCatalog?.subtitle || category.description}
+          primary={
+            <NavLink to="#/" className="inline-flex">
+              <Button className="rounded-full px-10 py-4">{t.backToHome}</Button>
+            </NavLink>
+          }
+          secondary={
+            <div className="flex items-center gap-3 text-sm opacity-80 px-1">
+              <span className={cx("h-px w-10", dark ? "bg-white/30" : "bg-neutral-300")} />
+              <span className="tracking-tight">{category.subtitle}</span>
+            </div>
+          }
+        />
 
-          <QuoteBand quote={quote} />
+        <QuoteBandMobile quote={quote} />
 
-          <section className="py-6">
-            <div className="grid gap-6">
-              {groups.map((g) => (
-                <div
-                  key={g.title}
-                  className={cx(
-                    "rounded-[1.6rem] backdrop-blur border shadow-[0_18px_45px_-32px_rgba(0,0,0,.55)] overflow-hidden",
-                    dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10"
-                  )}
-                >
-                  <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
-                  <div className="p-6">
-                    <h3 style={{ fontFamily: "var(--ow-display)", fontWeight: 650 }} className="text-xl mb-4">
-                      {g.title}
-                    </h3>
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
+          <div className="grid gap-4">
+            {groups.map((g) => (
+              <div
+                key={g.title}
+                className={cx(
+                  "rounded-[1.6rem] backdrop-blur border shadow-[0_18px_50px_-38px_rgba(0,0,0,.55)] overflow-hidden",
+                  dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10"
+                )}
+              >
+                <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
+                <div className="p-6">
+                  <h3
+                    className="mb-4 leading-tight"
+                    style={{
+                      fontFamily: "var(--ow-display)",
+                      letterSpacing: "-0.02em",
+                      fontWeight: 650,
+                      fontSize: "20px",
+                    }}
+                  >
+                    {g.title}
+                  </h3>
 
-                    <div className="grid gap-3">
-                      {g.items.map((it) => (
-                        <motion.button
-                          key={it.id}
-                          whileTap={{ scale: 0.99 }}
-                          transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                          onClick={() => onBook(it.name)}
-                          className={cx(
-                            "w-full text-left rounded-2xl border px-4 py-4 transition flex items-start justify-between gap-4",
-                            dark ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.07]" : "border-black/10 bg-white hover:bg-black/[0.02]"
-                          )}
-                        >
-                          <div className="min-w-0">
-                            <div className="font-semibold tracking-tight">{it.name}</div>
-                            <div className="text-xs opacity-70 mt-1">{it.duration || t.bookingDuration}</div>
-                            <div className="text-[13px] opacity-75 mt-3 line-clamp-3">{it.desc}</div>
-                          </div>
+                  <div className="grid gap-2">
+                    {g.items.map((it) => (
+                      <motion.button
+                        key={it.id}
+                        whileTap={{ scale: 0.99 }}
+                        transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                        onClick={() => onBook(it.name)}
+                        className={cx(
+                          "w-full text-left rounded-2xl border px-4 py-4 transition flex items-start justify-between gap-3",
+                          dark
+                            ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.07]"
+                            : "border-black/10 bg-white hover:bg-black/[0.02]"
+                        )}
+                      >
+                        <div className="min-w-0">
+                          <div className="font-semibold tracking-tight">{it.name}</div>
+                          <div className="text-xs opacity-70 mt-1">{it.duration || t.bookingDuration}</div>
+                          <div className="text-[13px] opacity-75 mt-2 line-clamp-2">{it.desc}</div>
+                        </div>
 
-                          <span className={cx("text-sm opacity-80 whitespace-nowrap", dark ? "text-white" : "text-neutral-900")}>
-                            {t.book}
-                          </span>
-                        </motion.button>
-                      ))}
-                    </div>
+                        <span className={cx("text-sm opacity-80 whitespace-nowrap", dark ? "text-white" : "text-neutral-900")}>
+                          {t.book}
+                        </span>
+                      </motion.button>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
+              </div>
+            ))}
+          </div>
+        </section>
 
-          <section className="py-8 text-center">
-            <Button className="rounded-full w-full py-4" onClick={() => onBook(t.bookGeneral)}>
-              {t.bookGeneral}
-            </Button>
-          </section>
-        </div>
+        <section className="py-10 text-center relative px-4 sm:px-6">
+          <div className={cx("absolute left-1/2 -top-4 -translate-x-1/2 h-10 w-px", dark ? "bg-white/20" : "bg-neutral-300")} />
+          <Button className="rounded-full px-10 py-4 w-full sm:w-auto" onClick={() => onBook(t.bookGeneral)}>
+            {t.bookGeneral}
+          </Button>
+        </section>
       </HeroBackdrop>
     </div>
   );
 }
 
-function CategoryPage({ category, onBook, dark, t }) {
-  const categoryQuote = category.key === "yoga" ? t.quote.yoga_1 : category.key === "education" ? t.quote.education : t.quote.wellness_home;
+function CategoryPageMobile({ category, onBook, dark, t }) {
+  const categoryQuote =
+    category.key === "yoga" ? t.quote.yoga_1 : category.key === "education" ? t.quote.education : t.quote.wellness_home;
 
   return (
-    <div className="pb-10">
+    <div className="pb-8">
       <HeroBackdrop bgImage={category.heroImage} dark={dark} accent={category.accent} style={{ backgroundPosition: "center 47%" }}>
-        <div className="max-w-7xl mx-auto px-5">
-          <Hero
-            title={category.title}
-            subtitle={category.description}
-            primary={
-              <Button className="rounded-full w-full py-4" onClick={() => onBook(category.title)}>
-                {t.book}
+        <HeroMobile
+          title={category.title}
+          subtitle={category.description}
+          primary={
+            <Button className="rounded-full px-10 py-4 w-full sm:w-auto" onClick={() => onBook(category.title)}>
+              {t.book}
+            </Button>
+          }
+          secondary={
+            <NavLink to="#/" className="inline-flex w-full sm:w-auto">
+              <Button variant="outline" className={cx("rounded-full px-10 py-4 w-full", dark ? "" : "border-black/10 bg-white")}>
+                {t.backToHome}
               </Button>
-            }
-            secondary={
-              <NavLink to="#/" className="inline-flex w-full">
-                <Button variant="outline" className={cx("rounded-full w-full py-4", dark ? "" : "border-black/10 bg-white")}>
-                  {t.backToHome}
-                </Button>
-              </NavLink>
-            }
-          />
+            </NavLink>
+          }
+        />
 
-          <QuoteBand quote={categoryQuote} />
+        <QuoteBandMobile quote={categoryQuote} />
 
-          <InfoGrid
-            t={t}
-            dark={dark}
-            items={category.children.map((ch) => ({
-              title: ch.title,
-              desc: ch.blurb,
-              to: ch.route,
-              meta: category.subtitle,
-            }))}
-          />
-        </div>
+        <InfoGridMobile
+          t={t}
+          dark={dark}
+          items={category.children.map((ch) => ({
+            title: ch.title,
+            desc: ch.blurb,
+            to: ch.route,
+            meta: category.subtitle,
+          }))}
+        />
       </HeroBackdrop>
     </div>
   );
 }
 
-function SubTopicPage({ category, sub, onBook, dark, t, products }) {
+function SubTopicPageMobile({ category, sub, onBook, dark, t, products }) {
   const isWellness = category.key === "wellness";
   const filtered = useMemo(() => products.filter((p) => p.for === sub.key), [products, sub.key]);
 
@@ -1628,87 +1370,101 @@ function SubTopicPage({ category, sub, onBook, dark, t, products }) {
     category.key === "yoga" ? t.quote.yoga_2 : category.key === "education" ? t.quote.education : t.quote.wellness_home;
 
   return (
-    <div className="pb-12">
+    <div className="pb-10">
       <HeroBackdrop bgImage={category.heroImage} dark={dark} accent={category.accent}>
-        <div className="max-w-7xl mx-auto px-5">
-          <Hero
-            title={sub.title}
-            subtitle={sub.blurb}
-            primary={
-              isWellness ? (
-                <NavLink to={`#/${category.key}`} className="inline-flex w-full">
-                  <Button className="rounded-full w-full py-4">{t.browseMore}</Button>
-                </NavLink>
-              ) : (
-                <Button className="rounded-full w-full py-4" onClick={() => onBook(sub.title)}>
-                  {t.book}
-                </Button>
-              )
-            }
-            secondary={
-              <NavLink to={`#/${category.key}`} className="inline-flex w-full">
-                <Button variant="outline" className={cx("rounded-full w-full py-4", dark ? "" : "border-black/10 bg-white")}>
-                  {t.back}
-                </Button>
+        <HeroMobile
+          title={sub.title}
+          subtitle={sub.blurb}
+          primary={
+            isWellness ? (
+              <NavLink to={`#/${category.key}`} className="inline-flex w-full sm:w-auto">
+                <Button className="rounded-full px-10 py-4 w-full">{t.browseMore}</Button>
               </NavLink>
-            }
-          />
+            ) : (
+              <Button className="rounded-full px-10 py-4 w-full sm:w-auto" onClick={() => onBook(sub.title)}>
+                {t.book}
+              </Button>
+            )
+          }
+          secondary={
+            <NavLink to={`#/${category.key}`} className="inline-flex w-full sm:w-auto">
+              <Button variant="outline" className={cx("rounded-full px-10 py-4 w-full", dark ? "" : "border-black/10 bg-white")}>
+                {t.back}
+              </Button>
+            </NavLink>
+          }
+        />
 
-          <QuoteBand quote={quoteForThisSubpage} />
+        <QuoteBandMobile quote={quoteForThisSubpage} />
 
-          <section className="py-6">
-            <div className="grid gap-5">
-              {bodyBlocks.map((b) => {
-                const text = b.textKey ? t.copy[b.textKey] : b.text;
-                return (
-                  <motion.div
-                    key={b.title}
-                    initial={{ opacity: 0, y: 14 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.35 }}
-                    transition={{ duration: 0.55, ease: "easeOut" }}
-                    className={cx(
-                      "rounded-[1.6rem] backdrop-blur border shadow-[0_18px_45px_-32px_rgba(0,0,0,.55)] p-6 overflow-hidden",
-                      dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10"
-                    )}
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
+          <div className="grid gap-4">
+            {bodyBlocks.map((b) => {
+              const text = b.textKey ? t.copy[b.textKey] : b.text;
+              return (
+                <motion.div
+                  key={b.title}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.35 }}
+                  transition={{ duration: 0.55, ease: "easeOut" }}
+                  className={cx(
+                    "rounded-[1.6rem] backdrop-blur border shadow-[0_18px_50px_-38px_rgba(0,0,0,.55)] p-6 overflow-hidden",
+                    dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10"
+                  )}
+                >
+                  <div className={cx("h-1 w-14 mb-5 bg-gradient-to-r", CARD_LINE)} />
+                  <h3
+                    className="mb-2 leading-tight"
+                    style={{
+                      fontFamily: "var(--ow-display)",
+                      letterSpacing: "-0.02em",
+                      fontWeight: 650,
+                      fontSize: "20px",
+                    }}
                   >
-                    <div className={cx("h-1 w-14 mb-5 bg-gradient-to-r", CARD_LINE)} />
-                    <h3 style={{ fontFamily: "var(--ow-display)", fontWeight: 650 }} className="text-xl mb-2">
-                      {b.title}
-                    </h3>
-                    <p className="text-[13px] opacity-85 leading-relaxed whitespace-pre-wrap">{text}</p>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </section>
+                    {b.title}
+                  </h3>
+                  <p className="text-[13.5px] opacity-85 leading-relaxed tracking-[-0.01em]">{text}</p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </section>
 
-          {isWellness ? (
-            <section className="py-6">
-              <div className="flex items-center justify-between flex-wrap gap-3 mb-5">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.22em] opacity-60">{t.subProductsTitle}</p>
-                  <p className="text-sm opacity-75">{t.subProductsSub}</p>
-                </div>
-                <div className={cx("h-1 w-28 rounded-full bg-gradient-to-r", category.accent)} />
+        {isWellness ? (
+          <section className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+            <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.22em] opacity-60">{t.subProductsTitle}</p>
+                <p className="text-sm opacity-75 tracking-[-0.01em]">{t.subProductsSub}</p>
               </div>
+              <div className={cx("h-1 w-28 rounded-full bg-gradient-to-r", category.accent)} />
+            </div>
 
-              <div className="grid gap-5">
-                {filtered.map((p) => (
+            <div className="grid sm:grid-cols-2 gap-4 items-stretch">
+              {filtered.map((p) => (
+                <motion.div
+                  key={p.id}
+                  whileTap={{ scale: 0.99 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                  className="h-full"
+                >
                   <div
-                    key={p.id}
                     className={cx(
-                      "rounded-[1.6rem] backdrop-blur border shadow-[0_18px_45px_-32px_rgba(0,0,0,.55)] overflow-hidden",
+                      "h-full rounded-[1.6rem] backdrop-blur border shadow-[0_18px_50px_-38px_rgba(0,0,0,.55)] overflow-hidden flex flex-col",
                       dark ? "bg-white/[0.06] border-white/10" : "bg-white/80 border-black/10"
                     )}
                   >
                     <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
-                    <div className={cx("h-36", dark ? "bg-white/[0.05]" : "bg-neutral-200/70")} aria-label={t.productImageAlt} />
-                    <div className="p-6">
-                      <h4 style={{ fontFamily: "var(--ow-display)", fontWeight: 650 }} className="text-lg mb-1">
-                        {p.title}
-                      </h4>
-                      <p className="text-sm opacity-70">{p.tone}</p>
+                    <div className={cx("h-32", dark ? "bg-white/[0.05]" : "bg-neutral-200/70")} aria-label={t.productImageAlt} />
+                    <div className="p-6 flex flex-col h-full">
+                      <div className="flex-1">
+                        <h4 style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }} className="text-lg mb-1">
+                          {p.title}
+                        </h4>
+                        <p className="text-sm opacity-70">{p.tone}</p>
+                      </div>
                       <div className="mt-4 flex items-center justify-between">
                         <p className="font-semibold">{p.price}</p>
                         <Button variant="outline" className="rounded-full">
@@ -1717,29 +1473,29 @@ function SubTopicPage({ category, sub, onBook, dark, t, products }) {
                       </div>
                     </div>
                   </div>
-                ))}
-
-                {filtered.length === 0 ? (
-                  <div className={cx("rounded-[1.6rem] border p-6 opacity-80", dark ? "border-white/10 bg-white/[0.06]" : "border-black/10 bg-white/80")}>
-                    {t.noProducts}
-                  </div>
-                ) : null}
-              </div>
-            </section>
-          ) : null}
-
-          <section className="py-10 text-center">
-            {isWellness ? (
-              <NavLink to={`#/${category.key}`}>
-                <Button className="rounded-full w-full py-4">{t.backTo(category.title)}</Button>
-              </NavLink>
-            ) : (
-              <Button className="rounded-full w-full py-4" onClick={() => onBook(sub.title)}>
-                {t.book}
-              </Button>
-            )}
+                </motion.div>
+              ))}
+              {filtered.length === 0 ? (
+                <div className={cx("rounded-[1.6rem] border p-6 opacity-80", dark ? "border-white/10 bg-white/[0.06]" : "border-black/10 bg-white/80")}>
+                  {t.noProducts}
+                </div>
+              ) : null}
+            </div>
           </section>
-        </div>
+        ) : null}
+
+        <section className="py-12 text-center relative px-4 sm:px-6">
+          <div className={cx("absolute left-1/2 -top-6 -translate-x-1/2 h-12 w-px", dark ? "bg-white/20" : "bg-neutral-300")} />
+          {isWellness ? (
+            <NavLink to={`#/${category.key}`}>
+              <Button className="rounded-full px-10 py-4 w-full sm:w-auto">{t.backTo(category.title)}</Button>
+            </NavLink>
+          ) : (
+            <Button className="rounded-full px-10 py-4 w-full sm:w-auto" onClick={() => onBook(sub.title)}>
+              {t.book}
+            </Button>
+          )}
+        </section>
       </HeroBackdrop>
     </div>
   );
@@ -1809,7 +1565,7 @@ export default function AppMobile() {
   const token = typeof window !== "undefined" ? localStorage.getItem("ow_admin_token") : null;
 
   return (
-    <MobileShell
+    <ShellMobile
       dark={dark}
       onToggleDark={() => setDark((d) => !d)}
       lang={lang}
@@ -1822,24 +1578,31 @@ export default function AppMobile() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.32, ease: "easeOut" }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
         >
-          {parsed.page === "home" ? <HomePage onBook={openBooking} dark={dark} t={t} categories={categories} /> : null}
+          {parsed.page === "home" ? <HomePageMobile onBook={openBooking} dark={dark} t={t} categories={categories} /> : null}
 
           {parsed.page === "category" && parsed.category ? (
             parsed.category.key === "wellness" ? (
-              <WellnessCatalogPage category={parsed.category} onBook={openBooking} dark={dark} t={t} />
+              <WellnessCatalogPageMobile category={parsed.category} onBook={openBooking} dark={dark} t={t} />
             ) : (
-              <CategoryPage category={parsed.category} onBook={openBooking} dark={dark} t={t} />
+              <CategoryPageMobile category={parsed.category} onBook={openBooking} dark={dark} t={t} />
             )
           ) : null}
 
           {parsed.page === "sub" && parsed.category && parsed.sub ? (
-            <SubTopicPage category={parsed.category} sub={parsed.sub} onBook={openBooking} dark={dark} t={t} products={products} />
+            <SubTopicPageMobile
+              category={parsed.category}
+              sub={parsed.sub}
+              onBook={openBooking}
+              dark={dark}
+              t={t}
+              products={products}
+            />
           ) : null}
 
           {parsed.page === "admin_login" ? (
-            <AdminLoginPage
+            <AdminLoginPageMobile
               dark={dark}
               onAuthed={() => {
                 window.location.hash = "#/admin/dashboard";
@@ -1849,9 +1612,9 @@ export default function AppMobile() {
 
           {parsed.page === "admin_dashboard" ? (
             token ? (
-              <AdminDashboardPage dark={dark} t={t} />
+              <AdminDashboardPageMobile dark={dark} t={t} />
             ) : (
-              <AdminLoginPage
+              <AdminLoginPageMobile
                 dark={dark}
                 onAuthed={() => {
                   window.location.hash = "#/admin/dashboard";
@@ -1862,13 +1625,14 @@ export default function AppMobile() {
         </motion.div>
       </AnimatePresence>
 
-      <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} contextTitle={bookingContext} t={t} />
+      <BookingModalMobile open={bookingOpen} onClose={() => setBookingOpen(false)} contextTitle={bookingContext} t={t} />
 
+      {/* Contact popup only on Education pages */}
       {parsed.page !== "admin_login" &&
       parsed.page !== "admin_dashboard" &&
       parsed.page !== "home" &&
       parsed.category?.key === "education" ? (
-        <ContactPopup
+        <ContactPopupMobile
           open={contactOpen}
           onOpen={() => setContactOpen(true)}
           onClose={() => setContactOpen(false)}
@@ -1876,6 +1640,6 @@ export default function AppMobile() {
           t={t}
         />
       ) : null}
-    </MobileShell>
+    </ShellMobile>
   );
 }

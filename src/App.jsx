@@ -53,3 +53,5 @@ export default function App() {
 
   return isMobileOrTablet ? <AppMobile /> : <AppDesktop />;
 }
+// ✅ Expose shared data/builders so AppMobile can reuse everything without duplicating I18N
+export { I18N, buildCategories, buildProducts };
