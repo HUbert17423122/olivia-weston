@@ -829,8 +829,7 @@ function getInitialLang() {
   return "pl";
 }
 
-/* ================= LOCAL ASSET BACKGROUNDS MAP ================= */
-const BACKGROUNDS = {
+export const BACKGROUNDS = {
   home: bgHome,
   yoga: bgYoga,
   education: bgEducation,
@@ -2856,4 +2855,4 @@ export default function AppDesktop() {
     </Shell>
   );
 }
-export { I18N, getInitialLang, buildCategories, buildProducts, BACKGROUNDS };
+export { I18N, getInitialLang, buildCategories, buildProducts };
