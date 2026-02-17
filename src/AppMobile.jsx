@@ -1,19 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// ✅ ONLY import shared content from owShared (DO NOT import from App.jsx)
+// ✅ Import shared content from desktop (real source of truth)
 import {
   I18N,
   getInitialLang,
   buildCategories,
   buildProducts,
   BACKGROUNDS,
-} from "./owShared";
+} from "./AppDesktop.jsx";
 
 /* ================= CONFIG ================= */
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080/api";
 
-/* ================= GLOBAL CARD LINE (use same grey everywhere) ================= */
+/* ================= GLOBAL CARD LINE ================= */
 const CARD_LINE = "from-[#aab3c2] via-[#8e97a6] to-[#737d8a]";
 
 function cx(...xs) {
@@ -65,7 +65,7 @@ function HeroBackdrop({
   bgImage,
   dark,
   accent,
-  backdropHeightClass = "min-h-[880px]",
+  backdropHeightClass = "min-h-[820px]",
   style,
   children,
 }) {
@@ -144,15 +144,11 @@ function MobileShell({ dark, onToggleDark, lang, onToggleLang, t, children }) {
         a{ text-decoration: none; }
       `}</style>
 
-      {/* Top bar */}
       <header className="sticky top-0 z-40 backdrop-blur border-b border-black/10 bg-white/60">
         <div className="px-4 py-3 flex items-center justify-between gap-3">
           <NavLink
             to="#/"
-            className={cx(
-              "tracking-[0.16em] text-[11px] uppercase transition",
-              "opacity-90 hover:opacity-100 whitespace-nowrap"
-            )}
+            className="tracking-[0.16em] text-[11px] uppercase transition opacity-90 hover:opacity-100 whitespace-nowrap"
             style={{ fontFamily: "var(--ow-sans)" }}
           >
             {t.navBrand}
@@ -197,7 +193,10 @@ function MobileShell({ dark, onToggleDark, lang, onToggleLang, t, children }) {
             </Button>
 
             <NavLink to={token ? "#/admin/dashboard" : "#/admin/login"}>
-              <Button variant="outline" className="rounded-full px-4 py-2 text-[12px] border-black/10 bg-white">
+              <Button
+                variant="outline"
+                className="rounded-full px-4 py-2 text-[12px] border-black/10 bg-white"
+              >
                 {token ? t.dashboard : t.admin}
               </Button>
             </NavLink>
@@ -219,7 +218,7 @@ function MobileShell({ dark, onToggleDark, lang, onToggleLang, t, children }) {
   );
 }
 
-/* ================= MOBILE PAGES ================= */
+/* ================= MOBILE HOME PAGE ================= */
 function MobileHomePage({ onBook, dark, t, categories }) {
   return (
     <div className="pb-6">
@@ -257,7 +256,6 @@ function MobileHomePage({ onBook, dark, t, categories }) {
             <div className="text-xs opacity-75 px-1">{t.homeHeroMeta}</div>
           </div>
 
-          {/* Cards */}
           <div className="mt-8 grid gap-4">
             {categories.map((c) => (
               <NavLink key={c.key} to={`#/${c.key}`} className="block">
@@ -316,31 +314,17 @@ function MobileHomePage({ onBook, dark, t, categories }) {
   );
 }
 
-/* ================= ROUTE PARSER (same logic) ================= */
+/* ================= ROUTE PARSER ================= */
 function parseRoute(hash, categories) {
   if (hash === "#/" || hash === "#" || !hash) return { page: "home" };
 
   const parts = hash.replace(/^#\//, "").split("/");
 
-  if (parts[0] === "admin") {
-    if (parts[1] === "login") return { page: "admin_login" };
-    if (parts[1] === "dashboard") return { page: "admin_dashboard" };
-    return { page: "admin_login" };
-  }
-
   const catKey = parts[0];
-  const subKey = parts[1];
-
   const category = categories.find((c) => c.key === catKey);
   if (!category) return { page: "home" };
 
-  if (!subKey) return { page: "category", category };
-
-  const route = `#/${category.key}/${subKey}`;
-  const sub = category.children.find((c) => c.route === route);
-
-  if (!sub) return { page: "category", category };
-  return { page: "sub", category, sub };
+  return { page: "home" };
 }
 
 /* ================= APP MOBILE ================= */
@@ -348,12 +332,15 @@ export default function AppMobile() {
   const route = useHashRoute();
 
   const [lang, setLang] = useState(getInitialLang());
-  const t = I18N[lang];
+
+  // ✅ HARD SAFETY: if lang ever corrupts, never crash
+  const safeLang = lang === "pl" || lang === "en" ? lang : "pl";
+  const t = I18N[safeLang] || I18N.pl;
 
   const categories = useMemo(() => buildCategories(t), [t]);
-  const products = useMemo(() => buildProducts(t), [t]);
+  useMemo(() => buildProducts(t), [t]); // keep parity
 
-  const parsed = useMemo(() => parseRoute(route, categories), [route, categories]);
+  useMemo(() => parseRoute(route, categories), [route, categories]);
 
   const [dark, setDark] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -362,7 +349,7 @@ export default function AppMobile() {
   useEffect(() => {
     setBookingContext((c) => c || t.book);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang]);
+  }, [safeLang]);
 
   const openBooking = (context) => {
     setBookingContext(context);
@@ -380,28 +367,27 @@ export default function AppMobile() {
     <MobileShell
       dark={dark}
       onToggleDark={() => setDark((d) => !d)}
-      lang={lang}
+      lang={safeLang}
       onToggleLang={toggleLang}
       t={t}
     >
       <AnimatePresence mode="wait">
         <motion.div
-          key={route + "_" + lang}
+          key={route + "_" + safeLang}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.28, ease: "easeOut" }}
         >
-          {parsed.page === "home" ? (
-            <MobileHomePage onBook={openBooking} dark={dark} t={t} categories={categories} />
-          ) : (
-            // for now, fallback to home on mobile for non-home routes
-            <MobileHomePage onBook={openBooking} dark={dark} t={t} categories={categories} />
-          )}
+          <MobileHomePage
+            onBook={openBooking}
+            dark={dark}
+            t={t}
+            categories={categories}
+          />
         </motion.div>
       </AnimatePresence>
 
-      {/* Booking modal not included in this minimal mobile file yet */}
       {bookingOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
@@ -415,9 +401,6 @@ export default function AppMobile() {
               <Button className="w-full" onClick={() => setBookingOpen(false)}>
                 {t.bookingClose}
               </Button>
-            </div>
-            <div className="mt-3 text-xs opacity-70">
-              (Mobile booking UI can be added next—this is just a safe placeholder so build passes.)
             </div>
           </div>
         </div>
