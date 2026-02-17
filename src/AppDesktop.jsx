@@ -1101,7 +1101,14 @@ function Shell({ dark, onToggleDark, lang, onToggleLang, t, children }) {
 }
 
 /* ================= HERO BACKDROP ================= */
-{
+function HeroBackdrop({
+  bgImage,
+  dark,
+  accent,
+  backdropHeightClass = "min-h-[1020px]",
+  style,
+  children,
+}) {
   return (
     <div
       className={cx("relative overflow-hidden", backdropHeightClass)}
