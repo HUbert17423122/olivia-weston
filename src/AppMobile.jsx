@@ -14,7 +14,8 @@ import bgHome from "./assets/backgrounds/home.jpg";
 import bgYoga from "./assets/backgrounds/yoga.jpg";
 import bgEducation from "./assets/backgrounds/education.jpg";
 import bgWellness from "./assets/backgrounds/wellness.jpg";
-
+const API_BASE =
+  import.meta.env.VITE_API_BASE || "http://localhost:8080/api";
 const BACKGROUNDS = {
   home: bgHome,
   yoga: bgYoga,
