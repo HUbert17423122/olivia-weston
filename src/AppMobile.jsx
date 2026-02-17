@@ -62,7 +62,14 @@ function NavLink({ to, children, className }) {
 }
 
 /* ================= HERO BACKDROP (MOBILE-TUNED) ================= */
-{
+function HeroBackdrop({
+  bgImage,
+  dark,
+  accent,
+  backdropHeightClass = "min-h-[820px]",
+  style,
+  children,
+}) {
   return (
     <div
       className={cx("relative overflow-hidden", backdropHeightClass)}
@@ -81,20 +88,20 @@ function NavLink({ to, children, className }) {
       <div className={`absolute left-0 top-0 h-2 w-full bg-gradient-to-r ${accent}`} />
 
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.08] mix-blend-overlay"
+        className="pointer-events-none absolute inset-0 opacity-[0.075] mix-blend-overlay"
         style={{
           backgroundImage:
             "url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22 x=%220%22 y=%220%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22 opacity=%220.35%22/></svg>')",
         }}
       />
 
-      <div className={dark ? "absolute inset-0 bg-black/50" : "absolute inset-0 bg-white/25"} />
+      <div className={dark ? "absolute inset-0 bg-black/45" : "absolute inset-0 bg-white/25"} />
 
       <div
         className={
           dark
-            ? "absolute inset-0 bg-gradient-to-b from-black/75 via-black/35 to-black/85"
-            : "absolute inset-0 bg-gradient-to-b from-white/90 via-white/35 to-white/90"
+            ? "absolute inset-0 bg-gradient-to-b from-black/75 via-black/25 to-black/75"
+            : "absolute inset-0 bg-gradient-to-b from-white/85 via-white/25 to-white/85"
         }
       />
 
@@ -103,8 +110,8 @@ function NavLink({ to, children, className }) {
       <div
         className={
           dark
-            ? "pointer-events-none absolute bottom-0 left-0 right-0 h-60 bg-gradient-to-b from-transparent via-[#0b0f0f]/50 to-[#0b0f0f]"
-            : "pointer-events-none absolute bottom-0 left-0 right-0 h-60 bg-gradient-to-b from-transparent via-[#f5f7f7]/70 to-[#f5f7f7]"
+            ? "pointer-events-none absolute bottom-0 left-0 right-0 h-72 bg-gradient-to-b from-transparent via-[#0b0f0f]/60 to-[#0b0f0f]"
+            : "pointer-events-none absolute bottom-0 left-0 right-0 h-72 bg-gradient-to-b from-transparent via-[#f5f7f7]/70 to-[#f5f7f7]"
         }
       />
     </div>
