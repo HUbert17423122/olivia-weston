@@ -1,0 +1,6 @@
+/* Desktop-only overrides (optional for now)
+   We keep it empty so your current PC layout stays identical. */
+
+html.ow-desktop body {
+  /* no changes */
+}

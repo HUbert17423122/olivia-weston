@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { I18N, getInitialLang, buildCategories, buildProducts, BACKGROUNDS } from "./owShared";
 // ✅ Import shared content/builders from your existing App.jsx (no duplication)
 import { I18N, buildCategories, buildProducts } from "./App.jsx";
 

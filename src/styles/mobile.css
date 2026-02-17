@@ -1,0 +1,81 @@
+/* Mobile/Tablet-only overrides
+   This file ONLY affects layout when App.jsx sets: html.ow-mobile */
+
+html.ow-mobile header {
+  /* tighter top spacing so the hero starts sooner */
+  padding-top: 10px !important;
+}
+
+html.ow-mobile .max-w-7xl {
+  /* reduce side padding everywhere */
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+html.ow-mobile h1 {
+  /* make headings less giant on phones */
+  font-size: clamp(34px, 9vw, 52px) !important;
+  line-height: 1.02 !important;
+}
+
+html.ow-mobile p {
+  /* slightly larger + readable paragraphs */
+  font-size: 15px !important;
+  line-height: 1.65 !important;
+}
+
+/* Make the big “cards grids” become single column with nicer spacing */
+html.ow-mobile .grid.md\:grid-cols-3 {
+  grid-template-columns: 1fr !important;
+  gap: 18px !important;
+}
+
+html.ow-mobile .grid.md\:grid-cols-2 {
+  grid-template-columns: 1fr !important;
+  gap: 18px !important;
+}
+
+/* Reduce heavy card padding on mobile */
+html.ow-mobile .p-9,
+html.ow-mobile .p-10 {
+  padding: 18px !important;
+}
+
+/* Buttons: make them full width on phone so it feels premium */
+html.ow-mobile button,
+html.ow-mobile a[role="button"],
+html.ow-mobile a.inline-flex > button {
+  width: 100%;
+}
+
+/* Hero CTA row: stack properly */
+html.ow-mobile .flex.sm\:flex-row {
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+/* Reduce huge hero backdrop height on mobile */
+html.ow-mobile .min-h-\[1020px\],
+html.ow-mobile .min-h-\[980px\],
+html.ow-mobile .min-h-\[1120px\],
+html.ow-mobile .min-h-\[1160px\],
+html.ow-mobile .min-h-\[1280px\] {
+  min-height: auto !important;
+  padding-bottom: 30px !important;
+}
+
+/* Booking modal / popups: fit better */
+html.ow-mobile .rounded-\[2rem\] {
+  border-radius: 22px !important;
+}
+
+html.ow-mobile .w-\[min\(920px\,92vw\)\],
+html.ow-mobile .w-\[min\(620px\,92vw\)\],
+html.ow-mobile .w-\[min\(560px\,92vw\)\] {
+  width: calc(100vw - 24px) !important;
+}
+
+/* Tables in admin dashboard: allow horizontal scroll nicely */
+html.ow-mobile table {
+  font-size: 13px !important;
+}

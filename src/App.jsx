@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import AppDesktop from "./AppDesktop.jsx";
 import AppMobile from "./AppMobile.jsx";
 
-// CSS: load desktop styles by default, then swap on mobile/tablet
+// CSS: desktop base + mobile overrides (mobile.css only applies under .ow-mobile)
 import "./styles/desktop.css";
 import "./styles/mobile.css";
 
@@ -11,11 +11,11 @@ function useIsMobileOrTablet() {
   const get = () => {
     if (typeof window === "undefined") return false;
 
-    // Primary: viewport width
+    // 1) Primary: viewport width
     const w = window.innerWidth;
     if (w <= 1024) return true; // phones + tablets
 
-    // Secondary: coarse pointer (touch devices)
+    // 2) Secondary: touch / coarse pointer devices
     const coarse =
       window.matchMedia &&
       window.matchMedia("(pointer: coarse)").matches;
@@ -23,14 +23,28 @@ function useIsMobileOrTablet() {
     return !!coarse;
   };
 
-  const [isMobileOrTablet, setIsMobileOrTablet] = useState(get());
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(get);
 
   useEffect(() => {
     const onResize = () => setIsMobileOrTablet(get());
-    window.addEventListener("resize", onResize);
 
-    // also react to orientation changes on mobile/tablets
+    window.addEventListener("resize", onResize);
     window.addEventListener("orientationchange", onResize);
+
+    // Also react to pointer changes (some devices / browsers)
+    const mq = window.matchMedia ? window.matchMedia("(pointer: coarse)") : null;
+    if (mq) {
+      const onChange = () => setIsMobileOrTablet(get());
+      if (mq.addEventListener) mq.addEventListener("change", onChange);
+      else mq.addListener(onChange);
+
+      return () => {
+        window.removeEventListener("resize", onResize);
+        window.removeEventListener("orientationchange", onResize);
+        if (mq.removeEventListener) mq.removeEventListener("change", onChange);
+        else mq.removeListener(onChange);
+      };
+    }
 
     return () => {
       window.removeEventListener("resize", onResize);
@@ -53,5 +67,3 @@ export default function App() {
 
   return isMobileOrTablet ? <AppMobile /> : <AppDesktop />;
 }
-// ✅ Expose shared data/builders so AppMobile can reuse everything without duplicating I18N
-export { I18N, buildCategories, buildProducts };
