@@ -790,7 +790,6 @@ function AdminLoginPageMobile({ dark, onAuthed }) {
   return (
     <div className="px-4 py-8">
       <MobileCard dark={dark}>
-        <div className={cx("h-1 w-14 mb-4 bg-gradient-to-r", CARD_LINE)} />
         <h1 style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }} className="text-2xl">
           Admin Login
         </h1>
@@ -1360,7 +1359,6 @@ function MobileSubTopicPage({ category, sub, onBook, dark, t, products }) {
               const text = b.textKey ? t.copy[b.textKey] : b.text;
               return (
                 <MobileCard key={b.title} dark={dark}>
-                  <div className={cx("h-1 w-14 mb-4 bg-gradient-to-r", CARD_LINE)} />
                   <div style={{ fontFamily: "var(--ow-display)", fontWeight: 650 }} className="text-[20px]">
                     {b.title}
                   </div>
@@ -1378,7 +1376,6 @@ function MobileSubTopicPage({ category, sub, onBook, dark, t, products }) {
                     <p className="text-[11px] uppercase tracking-[0.22em] opacity-60">{t.subProductsTitle}</p>
                     <p className="text-sm opacity-75">{t.subProductsSub}</p>
                   </div>
-                  <div className={cx("h-1 w-24 rounded-full bg-gradient-to-r", category.accent)} />
                 </div>
 
                 <div className="mt-4 grid gap-3">
