@@ -62,14 +62,7 @@ function NavLink({ to, children, className }) {
 }
 
 /* ================= HERO BACKDROP (MOBILE-TUNED) ================= */
-function HeroBackdrop({
-  bgImage,
-  dark,
-  accent,
-  backdropHeightClass = "min-h-[720px]",
-  style,
-  children,
-}) {
+{
   return (
     <div
       className={cx("relative overflow-hidden", backdropHeightClass)}
@@ -328,11 +321,12 @@ function formatDateISO(d) {
   return d.toISOString().slice(0, 10);
 }
 
-function BookingModalMobile({ open, onClose, contextTitle, t, dark }) {
+function BookingModal({ open, onClose, contextTitle, t }) {
   const dates = useMemo(() => nextDays(14), []);
   const slots = useMemo(() => ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"], []);
 
   const [bookingEnabled, setBookingEnabled] = useState(true);
+
   const [takenSlots, setTakenSlots] = useState([]);
   const [pickedDate, setPickedDate] = useState(dates[2] || null);
   const [pickedSlot, setPickedSlot] = useState(slots[1] || null);
@@ -344,6 +338,8 @@ function BookingModalMobile({ open, onClose, contextTitle, t, dark }) {
   const [confirmed, setConfirmed] = useState(false);
   const [submitErr, setSubmitErr] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const sendingLabel = t.langToggleHint === "Język" ? "Wysyłanie…" : "Sending…";
 
   useEffect(() => {
     if (!open) return;
@@ -366,14 +362,23 @@ function BookingModalMobile({ open, onClose, contextTitle, t, dark }) {
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
-    setConfirmed(false);
-    setSubmitErr("");
-    setSubmitting(false);
+    if (!open) {
+      setTakenSlots([]);
+      setConfirmed(false);
+      setSubmitErr("");
+      setSubmitting(false);
+      setName("");
+      setPhone("");
+      setEmail("");
+      setPickedDate(dates[2] || null);
+      setPickedSlot(slots[1] || null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   useEffect(() => {
     if (!open || !pickedDate) return;
+
     let alive = true;
 
     (async () => {
@@ -385,9 +390,11 @@ function BookingModalMobile({ open, onClose, contextTitle, t, dark }) {
 
         const res = await fetch(`${API_BASE}/appointments/availability?${qs.toString()}`);
         const data = await res.json();
-        if (!res.ok) throw new Error();
+
+        if (!res.ok) throw new Error(data?.error || "Failed to load availability");
 
         if (!alive) return;
+
         const taken = Array.isArray(data.taken) ? data.taken : [];
         setTakenSlots(taken);
 
@@ -403,211 +410,224 @@ function BookingModalMobile({ open, onClose, contextTitle, t, dark }) {
     return () => {
       alive = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, pickedDate, contextTitle]);
+  }, [open, pickedDate, contextTitle]); // (slots + pickedSlot intentionally omitted)
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/55" onClick={onClose} />
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      {/* backdrop */}
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
+      {/* modal */}
       <motion.div
-        initial={{ opacity: 0, y: 18, scale: 0.99 }}
+        initial={{ opacity: 0, y: 18, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
         className={cx(
-          "relative w-full sm:w-[min(680px,92vw)] rounded-t-[1.75rem] sm:rounded-[1.75rem] overflow-hidden",
-          dark ? "bg-[#0f1414] text-white" : "bg-white text-neutral-900"
+          // ✅ MOBILE: full-width bottom sheet that never exceeds viewport
+          "relative w-full sm:w-[min(920px,92vw)]",
+          "max-h-[92dvh] sm:max-h-none",
+          "bg-white shadow-[0_40px_120px_-60px_rgba(0,0,0,.7)] overflow-hidden",
+          // ✅ MOBILE: rounded top only (sheet). Desktop: fully rounded.
+          "rounded-t-[2rem] sm:rounded-[2rem]"
         )}
+        style={{
+          // helps iOS safe area feel nicer (optional but great)
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
       >
-        <div className={cx("h-[5px] w-full bg-gradient-to-r", CARD_LINE)} />
-        <div className={cx("p-5 border-b", dark ? "border-white/10" : "border-black/10")}>
-          <div className="flex items-start justify-between gap-4">
+        {/* sticky header (so close button always visible on mobile) */}
+        <div className="sticky top-0 z-10 bg-white border-b border-neutral-200">
+          <div className="px-5 sm:px-8 py-5 sm:py-8 flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <div style={{ fontFamily: "var(--ow-display)", fontWeight: 650 }} className="text-xl">
+              <h3
+                style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }}
+                className="text-[20px] sm:text-2xl leading-tight"
+              >
                 {t.bookingTitle}
-              </div>
-              <div className="text-xs opacity-70 mt-1 truncate">{contextTitle}</div>
+              </h3>
+              <p className="text-sm opacity-70 mt-1 truncate">{contextTitle}</p>
             </div>
-            <Button variant="ghost" onClick={onClose} className={dark ? "hover:bg-white/10" : "hover:bg-black/5"}>
+
+            <Button variant="ghost" onClick={onClose} className="hover:bg-black/5">
               {t.bookingClose}
             </Button>
           </div>
         </div>
 
-        <div className="p-5 grid gap-5">
-          {!bookingEnabled ? (
-            <div className={cx("rounded-2xl border p-4", dark ? "border-white/10 bg-white/[0.05]" : "border-black/10 bg-black/[0.02]")}>
-              <p className="text-sm font-semibold">
-                {t.langToggleHint === "Język" ? "Rezerwacje są chwilowo wyłączone." : "Bookings are temporarily closed."}
-              </p>
-              <p className="text-xs opacity-75 mt-1">
-                {t.langToggleHint === "Język" ? "Spróbuj ponownie później lub skontaktuj się bezpośrednio." : "Please try again later or contact us directly."}
-              </p>
-            </div>
-          ) : null}
+        {/* ✅ scrollable content area (prevents “going out of screen”) */}
+        <div className="overflow-y-auto max-h-[calc(92dvh-88px)] sm:max-h-none">
+          <div className="px-5 sm:px-8 py-5 sm:py-8 grid gap-7 sm:gap-8 sm:grid-cols-2">
+            {/* LEFT: DAY */}
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.22em] opacity-60 mb-4">{t.bookingSelectDay}</p>
 
-          {/* Dates */}
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.22em] opacity-60 mb-3">{t.bookingSelectDay}</p>
-            <div className="grid grid-cols-2 gap-3">
-              {dates.map((d) => {
-                const active = pickedDate && pickedDate.getTime() === d.getTime();
-                return (
-                  <button
-                    key={d.toISOString()}
-                    disabled={!bookingEnabled}
-                    onClick={() => bookingEnabled && setPickedDate(d)}
-                    className={cx(
-                      "rounded-2xl border px-4 py-3 text-left transition",
-                      !bookingEnabled ? "opacity-40 cursor-not-allowed" : "",
-                      active
-                        ? dark
-                          ? "border-white/10 bg-white/10 text-white"
-                          : "border-neutral-900 bg-neutral-900 text-white"
-                        : dark
-                        ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.07]"
-                        : "border-black/10 bg-white hover:bg-black/[0.02]"
-                    )}
-                  >
-                    <div className="text-sm font-semibold">{formatDateLabel(d)}</div>
-                    <div className="text-xs opacity-70">{t.bookingAvailable}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Times */}
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.22em] opacity-60 mb-3">{t.bookingSelectTime}</p>
-            <div className="grid grid-cols-2 gap-3">
-              {slots.map((s) => {
-                const isTaken = takenSlots.includes(s);
-                const active = pickedSlot === s;
-
-                return (
-                  <button
-                    key={s}
-                    disabled={isTaken || !bookingEnabled}
-                    onClick={() => {
-                      if (isTaken || !bookingEnabled) return;
-                      setPickedSlot(s);
-                    }}
-                    className={cx(
-                      "rounded-2xl border px-4 py-3 text-left transition",
-                      !bookingEnabled ? "opacity-40 cursor-not-allowed" : "",
-                      isTaken
-                        ? dark
-                          ? "border-white/10 bg-white/[0.03] text-white/40 cursor-not-allowed"
-                          : "border-black/10 bg-black/[0.06] text-neutral-400 cursor-not-allowed"
-                        : active
-                        ? dark
-                          ? "border-white/10 bg-white/10 text-white"
-                          : "border-neutral-900 bg-neutral-900 text-white"
-                        : dark
-                        ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.07]"
-                        : "border-black/10 bg-white hover:bg-black/[0.02]"
-                    )}
-                  >
-                    <div className="text-sm font-semibold">{s}</div>
-                    <div className="text-xs opacity-70">
-                      {isTaken ? (t.langToggleHint === "Język" ? "Zajęte" : "Booked") : t.bookingDuration}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Form */}
-          <div className="grid gap-3">
-            <input
-              className={cx(
-                "rounded-2xl px-4 py-3 border outline-none",
-                dark ? "bg-white/[0.06] border-white/10 text-white placeholder:text-white/45" : "bg-white border-black/10"
-              )}
-              placeholder={t.formName}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <input
-              className={cx(
-                "rounded-2xl px-4 py-3 border outline-none",
-                dark ? "bg-white/[0.06] border-white/10 text-white placeholder:text-white/45" : "bg-white border-black/10"
-              )}
-              placeholder={t.formPhone}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-            <input
-              className={cx(
-                "rounded-2xl px-4 py-3 border outline-none",
-                dark ? "bg-white/[0.06] border-white/10 text-white placeholder:text-white/45" : "bg-white border-black/10"
-              )}
-              placeholder={t.formEmail}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {submitErr ? <p className={cx("text-sm", dark ? "text-red-300" : "text-red-600")}>{submitErr}</p> : null}
-          </div>
-
-          <div className="pt-1">
-            {!confirmed ? (
-              <Button
-                className="w-full rounded-full py-4"
-                disabled={submitting || !pickedDate || !pickedSlot || !bookingEnabled}
-                onClick={async () => {
-                  if (!pickedDate || !pickedSlot) return;
-
-                  if (!name.trim() || !phone.trim()) {
-                    setSubmitErr(t.formRequiredErr);
-                    return;
-                  }
-
-                  setSubmitting(true);
-                  setSubmitErr("");
-
-                  try {
-                    const res = await fetch(`${API_BASE}/appointments`, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        name: name.trim(),
-                        phone: phone.trim(),
-                        email: email.trim() || null,
-                        date: formatDateISO(pickedDate),
-                        time: pickedSlot,
-                        context: contextTitle || null,
-                      }),
-                    });
-
-                    const data = await res.json().catch(() => ({}));
-
-                    if (res.status === 409) {
-                      setSubmitErr(t.langToggleHint === "Język" ? "Ten termin jest już zajęty." : "This slot is already booked.");
-                      return;
-                    }
-
-                    if (!res.ok) throw new Error(data?.error || "Failed to submit");
-                    setConfirmed(true);
-                  } catch (e) {
-                    setSubmitErr(e.message || "Failed to submit");
-                  } finally {
-                    setSubmitting(false);
-                  }
-                }}
-              >
-                {submitting ? (t.langToggleHint === "Język" ? "Wysyłanie…" : "Sending…") : t.bookingConfirm}
-              </Button>
-            ) : (
-              <div className={cx("rounded-2xl border p-4", dark ? "border-white/10 bg-white/[0.05]" : "border-black/10 bg-black/[0.02]")}>
-                <p className="text-sm">
-                  {t.bookingSent(pickedDate ? formatDateLabel(pickedDate) : "", pickedSlot || "")}
-                </p>
-                <p className="text-xs opacity-75 mt-1">{t.bookingProdNote}</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {dates.map((d) => {
+                  const active = pickedDate && pickedDate.getTime() === d.getTime();
+                  return (
+                    <button
+                      key={d.toISOString()}
+                      disabled={!bookingEnabled}
+                      onClick={() => bookingEnabled && setPickedDate(d)}
+                      className={cx(
+                        "rounded-2xl border px-4 py-3 text-left transition",
+                        !bookingEnabled ? "opacity-40 cursor-not-allowed" : "",
+                        active
+                          ? "border-neutral-900 bg-neutral-900 text-white"
+                          : "border-neutral-200 bg-white hover:border-neutral-400"
+                      )}
+                    >
+                      <div className="text-sm font-semibold">{formatDateLabel(d)}</div>
+                      <div className="text-xs opacity-70">{t.bookingAvailable}</div>
+                    </button>
+                  );
+                })}
               </div>
-            )}
+            </div>
+
+            {/* RIGHT: TIME + FORM */}
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.22em] opacity-60 mb-4">{t.bookingSelectTime}</p>
+
+              <div className="grid grid-cols-2 gap-3">
+                {slots.map((s) => {
+                  const isTaken = takenSlots.includes(s);
+                  const active = pickedSlot === s;
+
+                  return (
+                    <button
+                      key={s}
+                      disabled={isTaken || !bookingEnabled}
+                      onClick={() => {
+                        if (isTaken || !bookingEnabled) return;
+                        setPickedSlot(s);
+                      }}
+                      className={cx(
+                        "rounded-2xl border px-4 py-3 text-left transition",
+                        !bookingEnabled ? "opacity-40 cursor-not-allowed" : "",
+                        isTaken
+                          ? "border-neutral-300 bg-neutral-200 text-neutral-400 cursor-not-allowed"
+                          : active
+                          ? "border-neutral-900 bg-neutral-900 text-white"
+                          : "border-neutral-200 bg-white hover:border-neutral-400"
+                      )}
+                    >
+                      <div className="text-sm font-semibold">{s}</div>
+                      <div className="text-xs opacity-70">
+                        {isTaken ? (t.langToggleHint === "Język" ? "Zajęte" : "Booked") : t.bookingDuration}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 grid gap-3">
+                <input
+                  className="rounded-2xl border border-neutral-200 px-4 py-3"
+                  placeholder={t.formName}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <input
+                  className="rounded-2xl border border-neutral-200 px-4 py-3"
+                  placeholder={t.formPhone}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+                <input
+                  className="rounded-2xl border border-neutral-200 px-4 py-3"
+                  placeholder={t.formEmail}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                {submitErr ? <p className="text-sm text-red-600">{submitErr}</p> : null}
+              </div>
+
+              {!bookingEnabled ? (
+                <div className="rounded-2xl border border-neutral-200 p-4 mt-4 bg-neutral-50">
+                  <p className="text-sm font-semibold">
+                    {t.langToggleHint === "Język" ? "Rezerwacje są chwilowo wyłączone." : "Bookings are temporarily closed."}
+                  </p>
+                  <p className="text-xs opacity-70 mt-1">
+                    {t.langToggleHint === "Język"
+                      ? "Spróbuj ponownie później lub skontaktuj się bezpośrednio."
+                      : "Please try again later or contact us directly."}
+                  </p>
+                </div>
+              ) : null}
+
+              <div className="mt-6 pb-6 sm:pb-0">
+                {!confirmed ? (
+                  <Button
+                    className="rounded-full px-9 w-full sm:w-auto"
+                    disabled={submitting || !pickedDate || !pickedSlot || !bookingEnabled}
+                    onClick={async () => {
+                      if (!pickedDate || !pickedSlot) return;
+
+                      if (!name.trim() || !phone.trim()) {
+                        setSubmitErr(t.formRequiredErr);
+                        return;
+                      }
+
+                      setSubmitting(true);
+                      setSubmitErr("");
+
+                      try {
+                        const res = await fetch(`${API_BASE}/appointments`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            name: name.trim(),
+                            phone: phone.trim(),
+                            email: email.trim() || null,
+                            date: formatDateISO(pickedDate),
+                            time: pickedSlot,
+                            context: contextTitle || null,
+                          }),
+                        });
+
+                        const data = await res.json();
+
+                        if (res.status === 409) {
+                          setSubmitErr(t.langToggleHint === "Język" ? "Ten termin jest już zajęty." : "This slot is already booked.");
+
+                          const qs = new URLSearchParams({
+                            date: formatDateISO(pickedDate),
+                            context: contextTitle || "",
+                          });
+                          const r2 = await fetch(`${API_BASE}/appointments/availability?${qs.toString()}`);
+                          const d2 = await r2.json();
+                          const taken = Array.isArray(d2.taken) ? d2.taken : [];
+                          setTakenSlots(taken);
+                          const firstFree = slots.find((s) => !taken.includes(s)) || null;
+                          setPickedSlot(firstFree);
+                          return;
+                        }
+
+                        if (!res.ok) throw new Error(data?.error || "Failed to submit");
+
+                        setConfirmed(true);
+                      } catch (e) {
+                        setSubmitErr(e.message || "Failed to submit");
+                      } finally {
+                        setSubmitting(false);
+                      }
+                    }}
+                  >
+                    {submitting ? sendingLabel : t.bookingConfirm}
+                  </Button>
+                ) : (
+                  <div className="rounded-2xl border border-neutral-200 p-4">
+                    <p className="text-sm">
+                      {t.bookingSent(pickedDate ? formatDateLabel(pickedDate) : "", pickedSlot || "")}
+                    </p>
+                    <p className="text-xs opacity-70 mt-1">{t.bookingProdNote}</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>

@@ -1102,14 +1102,7 @@ function Shell({ dark, onToggleDark, lang, onToggleLang, t, children }) {
 }
 
 /* ================= HERO BACKDROP ================= */
-function HeroBackdrop({
-  bgImage,
-  dark,
-  accent,
-  backdropHeightClass = "min-h-[980px] md:min-h-[1100px]",
-  style,
-  children,
-}) {
+{
   return (
     <div
       className={cx("relative overflow-hidden", backdropHeightClass)}
@@ -1330,7 +1323,6 @@ function BookingModal({ open, onClose, contextTitle, t }) {
         if (!res.ok) throw new Error();
         if (alive) setBookingEnabled(!!data.enabled);
       } catch {
-        // fail-open (don't block bookings if API call fails)
         if (alive) setBookingEnabled(true);
       }
     })();
@@ -1340,7 +1332,6 @@ function BookingModal({ open, onClose, contextTitle, t }) {
     };
   }, [open]);
 
-  // Reset form when closing
   useEffect(() => {
     if (!open) {
       setTakenSlots([]);
@@ -1356,7 +1347,6 @@ function BookingModal({ open, onClose, contextTitle, t }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Load taken slots whenever modal opens / date changes / context changes
   useEffect(() => {
     if (!open || !pickedDate) return;
 
@@ -1379,7 +1369,6 @@ function BookingModal({ open, onClose, contextTitle, t }) {
         const taken = Array.isArray(data.taken) ? data.taken : [];
         setTakenSlots(taken);
 
-        // If selected slot is now taken, move to first free (or null)
         if (pickedSlot && taken.includes(pickedSlot)) {
           const firstFree = slots.find((s) => !taken.includes(s)) || null;
           setPickedSlot(firstFree);
@@ -1392,209 +1381,223 @@ function BookingModal({ open, onClose, contextTitle, t }) {
     return () => {
       alive = false;
     };
-  }, [open, pickedDate, contextTitle]); // (slots + pickedSlot intentionally omitted to avoid loops)
+  }, [open, pickedDate, contextTitle]); // (slots + pickedSlot intentionally omitted)
 
-  // ✅ IMPORTANT: return after hooks, not before (prevents React internal hook mismatch)
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/45" onClick={onClose} />
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      {/* backdrop */}
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
+      {/* modal */}
       <motion.div
         initial={{ opacity: 0, y: 18, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        className="relative w-[min(920px,92vw)] rounded-[2rem] bg-white shadow-[0_40px_120px_-60px_rgba(0,0,0,.7)] overflow-hidden"
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className={cx(
+          // ✅ MOBILE: full-width bottom sheet that never exceeds viewport
+          "relative w-full sm:w-[min(920px,92vw)]",
+          "max-h-[92dvh] sm:max-h-none",
+          "bg-white shadow-[0_40px_120px_-60px_rgba(0,0,0,.7)] overflow-hidden",
+          // ✅ MOBILE: rounded top only (sheet). Desktop: fully rounded.
+          "rounded-t-[2rem] sm:rounded-[2rem]"
+        )}
+        style={{
+          // helps iOS safe area feel nicer (optional but great)
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
       >
-        <div className="p-8 border-b border-neutral-200 flex items-start justify-between gap-6">
-          <div>
-            <h3
-              style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }}
-              className="text-2xl"
-            >
-              {t.bookingTitle}
-            </h3>
-            <p className="text-sm opacity-70 mt-1">{contextTitle}</p>
-          </div>
+        {/* sticky header (so close button always visible on mobile) */}
+        <div className="sticky top-0 z-10 bg-white border-b border-neutral-200">
+          <div className="px-5 sm:px-8 py-5 sm:py-8 flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h3
+                style={{ fontFamily: "var(--ow-display)", fontWeight: 650, letterSpacing: "-0.02em" }}
+                className="text-[20px] sm:text-2xl leading-tight"
+              >
+                {t.bookingTitle}
+              </h3>
+              <p className="text-sm opacity-70 mt-1 truncate">{contextTitle}</p>
+            </div>
 
-          <Button variant="ghost" onClick={onClose} className="hover:bg-black/5">
-            {t.bookingClose}
-          </Button>
+            <Button variant="ghost" onClick={onClose} className="hover:bg-black/5">
+              {t.bookingClose}
+            </Button>
+          </div>
         </div>
 
-        <div className="p-8 grid md:grid-cols-2 gap-8">
-          {/* LEFT: DAY */}
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.22em] opacity-60 mb-4">{t.bookingSelectDay}</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {dates.map((d) => {
-                const active = pickedDate && pickedDate.getTime() === d.getTime();
-                return (
-                  <button
-                    key={d.toISOString()}
-                    disabled={!bookingEnabled}
-                    onClick={() => bookingEnabled && setPickedDate(d)}
-                    className={cx(
-                      "rounded-2xl border px-4 py-3 text-left transition",
-                      !bookingEnabled ? "opacity-40 cursor-not-allowed" : "",
-                      active
-                        ? "border-neutral-900 bg-neutral-900 text-white"
-                        : "border-neutral-200 bg-white hover:border-neutral-400"
-                    )}
-                  >
-                    <div className="text-sm font-semibold">{formatDateLabel(d)}</div>
-                    <div className="text-xs opacity-70">{t.bookingAvailable}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+        {/* ✅ scrollable content area (prevents “going out of screen”) */}
+        <div className="overflow-y-auto max-h-[calc(92dvh-88px)] sm:max-h-none">
+          <div className="px-5 sm:px-8 py-5 sm:py-8 grid gap-7 sm:gap-8 sm:grid-cols-2">
+            {/* LEFT: DAY */}
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.22em] opacity-60 mb-4">{t.bookingSelectDay}</p>
 
-          {/* RIGHT: TIME + FORM */}
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.22em] opacity-60 mb-4">{t.bookingSelectTime}</p>
-
-            <div className="grid grid-cols-2 gap-3">
-              {slots.map((s) => {
-                const isTaken = takenSlots.includes(s);
-                const active = pickedSlot === s;
-
-                return (
-                  <button
-                    key={s}
-                    disabled={isTaken || !bookingEnabled}
-                    onClick={() => {
-                      if (isTaken || !bookingEnabled) return;
-                      setPickedSlot(s);
-                    }}
-                    className={cx(
-                      "rounded-2xl border px-4 py-3 text-left transition",
-                      !bookingEnabled ? "opacity-40 cursor-not-allowed" : "",
-                      isTaken
-                        ? "border-neutral-300 bg-neutral-200 text-neutral-400 cursor-not-allowed"
-                        : active
-                        ? "border-neutral-900 bg-neutral-900 text-white"
-                        : "border-neutral-200 bg-white hover:border-neutral-400"
-                    )}
-                  >
-                    <div className="text-sm font-semibold">{s}</div>
-                    <div className="text-xs opacity-70">
-                      {isTaken ? (t.langToggleHint === "Język" ? "Zajęte" : "Booked") : t.bookingDuration}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="mt-6 grid gap-3">
-              <input
-                className="rounded-2xl border border-neutral-200 px-4 py-3"
-                placeholder={t.formName}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <input
-                className="rounded-2xl border border-neutral-200 px-4 py-3"
-                placeholder={t.formPhone}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-              <input
-                className="rounded-2xl border border-neutral-200 px-4 py-3"
-                placeholder={t.formEmail}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              {submitErr ? <p className="text-sm text-red-600">{submitErr}</p> : null}
-            </div>
-            {!bookingEnabled ? (
-              <div className="rounded-2xl border border-neutral-200 p-4 mb-4 bg-neutral-50">
-                <p className="text-sm font-semibold">
-                  {t.langToggleHint === "Język" ? "Rezerwacje są chwilowo wyłączone." : "Bookings are temporarily closed."}
-                </p>
-                <p className="text-xs opacity-70 mt-1">
-                  {t.langToggleHint === "Język"
-                    ? "Spróbuj ponownie później lub skontaktuj się bezpośrednio."
-                    : "Please try again later or contact us directly."}
-                </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {dates.map((d) => {
+                  const active = pickedDate && pickedDate.getTime() === d.getTime();
+                  return (
+                    <button
+                      key={d.toISOString()}
+                      disabled={!bookingEnabled}
+                      onClick={() => bookingEnabled && setPickedDate(d)}
+                      className={cx(
+                        "rounded-2xl border px-4 py-3 text-left transition",
+                        !bookingEnabled ? "opacity-40 cursor-not-allowed" : "",
+                        active
+                          ? "border-neutral-900 bg-neutral-900 text-white"
+                          : "border-neutral-200 bg-white hover:border-neutral-400"
+                      )}
+                    >
+                      <div className="text-sm font-semibold">{formatDateLabel(d)}</div>
+                      <div className="text-xs opacity-70">{t.bookingAvailable}</div>
+                    </button>
+                  );
+                })}
               </div>
-            ) : null}
+            </div>
 
-            <div className="mt-6">
-              {!confirmed ? (
-                <Button
-                  className="rounded-full px-9"
-                  disabled={submitting || !pickedDate || !pickedSlot || !bookingEnabled}
-                  onClick={async () => {
-                    if (!pickedDate || !pickedSlot) return;
+            {/* RIGHT: TIME + FORM */}
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.22em] opacity-60 mb-4">{t.bookingSelectTime}</p>
 
-                    if (!name.trim() || !phone.trim()) {
-                      setSubmitErr(t.formRequiredErr);
-                      return;
-                    }
+              <div className="grid grid-cols-2 gap-3">
+                {slots.map((s) => {
+                  const isTaken = takenSlots.includes(s);
+                  const active = pickedSlot === s;
 
-                    setSubmitting(true);
-                    setSubmitErr("");
+                  return (
+                    <button
+                      key={s}
+                      disabled={isTaken || !bookingEnabled}
+                      onClick={() => {
+                        if (isTaken || !bookingEnabled) return;
+                        setPickedSlot(s);
+                      }}
+                      className={cx(
+                        "rounded-2xl border px-4 py-3 text-left transition",
+                        !bookingEnabled ? "opacity-40 cursor-not-allowed" : "",
+                        isTaken
+                          ? "border-neutral-300 bg-neutral-200 text-neutral-400 cursor-not-allowed"
+                          : active
+                          ? "border-neutral-900 bg-neutral-900 text-white"
+                          : "border-neutral-200 bg-white hover:border-neutral-400"
+                      )}
+                    >
+                      <div className="text-sm font-semibold">{s}</div>
+                      <div className="text-xs opacity-70">
+                        {isTaken ? (t.langToggleHint === "Język" ? "Zajęte" : "Booked") : t.bookingDuration}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
 
-                    try {
-                      const res = await fetch(`${API_BASE}/appointments`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          name: name.trim(),
-                          phone: phone.trim(),
-                          email: email.trim() || null,
-                          date: formatDateISO(pickedDate),
-                          time: pickedSlot,
-                          context: contextTitle || null,
-                        }),
-                      });
+              <div className="mt-6 grid gap-3">
+                <input
+                  className="rounded-2xl border border-neutral-200 px-4 py-3"
+                  placeholder={t.formName}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <input
+                  className="rounded-2xl border border-neutral-200 px-4 py-3"
+                  placeholder={t.formPhone}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+                <input
+                  className="rounded-2xl border border-neutral-200 px-4 py-3"
+                  placeholder={t.formEmail}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                {submitErr ? <p className="text-sm text-red-600">{submitErr}</p> : null}
+              </div>
 
-                      const data = await res.json();
+              {!bookingEnabled ? (
+                <div className="rounded-2xl border border-neutral-200 p-4 mt-4 bg-neutral-50">
+                  <p className="text-sm font-semibold">
+                    {t.langToggleHint === "Język" ? "Rezerwacje są chwilowo wyłączone." : "Bookings are temporarily closed."}
+                  </p>
+                  <p className="text-xs opacity-70 mt-1">
+                    {t.langToggleHint === "Język"
+                      ? "Spróbuj ponownie później lub skontaktuj się bezpośrednio."
+                      : "Please try again later or contact us directly."}
+                  </p>
+                </div>
+              ) : null}
 
-                      // ✅ Handle conflict nicely and refresh availability
-                      if (res.status === 409) {
-                        setSubmitErr(
-                          t.langToggleHint === "Język"
-                            ? "Ten termin jest już zajęty."
-                            : "This slot is already booked."
-                        );
+              <div className="mt-6 pb-6 sm:pb-0">
+                {!confirmed ? (
+                  <Button
+                    className="rounded-full px-9 w-full sm:w-auto"
+                    disabled={submitting || !pickedDate || !pickedSlot || !bookingEnabled}
+                    onClick={async () => {
+                      if (!pickedDate || !pickedSlot) return;
 
-                        const qs = new URLSearchParams({
-                          date: formatDateISO(pickedDate),
-                          context: contextTitle || "",
-                        });
-                        const r2 = await fetch(`${API_BASE}/appointments/availability?${qs.toString()}`);
-                        const d2 = await r2.json();
-                        setTakenSlots(Array.isArray(d2.taken) ? d2.taken : []);
-
-                        // unselect (or pick first free if you prefer)
-                        const taken = Array.isArray(d2.taken) ? d2.taken : [];
-                        const firstFree = slots.find((s) => !taken.includes(s)) || null;
-                        setPickedSlot(firstFree);
+                      if (!name.trim() || !phone.trim()) {
+                        setSubmitErr(t.formRequiredErr);
                         return;
                       }
 
-                      if (!res.ok) throw new Error(data?.error || "Failed to submit");
+                      setSubmitting(true);
+                      setSubmitErr("");
 
-                      setConfirmed(true);
-                    } catch (e) {
-                      setSubmitErr(e.message || "Failed to submit");
-                    } finally {
-                      setSubmitting(false);
-                    }
-                  }}
-                >
-                  {submitting ? sendingLabel : t.bookingConfirm}
-                </Button>
-              ) : (
-                <div className="rounded-2xl border border-neutral-200 p-4">
-                  <p className="text-sm">
-                    {t.bookingSent(pickedDate ? formatDateLabel(pickedDate) : "", pickedSlot || "")}
-                  </p>
-                  <p className="text-xs opacity-70 mt-1">{t.bookingProdNote}</p>
-                </div>
-              )}
+                      try {
+                        const res = await fetch(`${API_BASE}/appointments`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            name: name.trim(),
+                            phone: phone.trim(),
+                            email: email.trim() || null,
+                            date: formatDateISO(pickedDate),
+                            time: pickedSlot,
+                            context: contextTitle || null,
+                          }),
+                        });
+
+                        const data = await res.json();
+
+                        if (res.status === 409) {
+                          setSubmitErr(t.langToggleHint === "Język" ? "Ten termin jest już zajęty." : "This slot is already booked.");
+
+                          const qs = new URLSearchParams({
+                            date: formatDateISO(pickedDate),
+                            context: contextTitle || "",
+                          });
+                          const r2 = await fetch(`${API_BASE}/appointments/availability?${qs.toString()}`);
+                          const d2 = await r2.json();
+                          const taken = Array.isArray(d2.taken) ? d2.taken : [];
+                          setTakenSlots(taken);
+                          const firstFree = slots.find((s) => !taken.includes(s)) || null;
+                          setPickedSlot(firstFree);
+                          return;
+                        }
+
+                        if (!res.ok) throw new Error(data?.error || "Failed to submit");
+
+                        setConfirmed(true);
+                      } catch (e) {
+                        setSubmitErr(e.message || "Failed to submit");
+                      } finally {
+                        setSubmitting(false);
+                      }
+                    }}
+                  >
+                    {submitting ? sendingLabel : t.bookingConfirm}
+                  </Button>
+                ) : (
+                  <div className="rounded-2xl border border-neutral-200 p-4">
+                    <p className="text-sm">
+                      {t.bookingSent(pickedDate ? formatDateLabel(pickedDate) : "", pickedSlot || "")}
+                    </p>
+                    <p className="text-xs opacity-70 mt-1">{t.bookingProdNote}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
