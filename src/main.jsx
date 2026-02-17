@@ -1,47 +1,38 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
-import AppMobile from "./AppMobile.jsx";
+
+// Tailwind base
 import "./index.css";
 
-function useMobileApp() {
-  // Tablet + phone
-  // - width <= 1024px covers iPad portrait/landscape nicely
-  // - coarse pointer catches many phones even if zoomed
-  const mqWidth = window.matchMedia("(max-width: 1024px)");
-  const mqCoarse = window.matchMedia("(pointer: coarse)");
+// Force-load both CSS files globally
+import "./styles/desktop.css";
+import "./styles/mobile.css";
 
-  return mqWidth.matches || mqCoarse.matches;
-}
+// ✅ Set html class immediately (before React mounts)
+(function setInitialDeviceClass() {
+  try {
+    const root = document.documentElement;
 
-function Root() {
-  const [isMobile, setIsMobile] = React.useState(useMobileApp());
+    const isMobileOrTablet = (() => {
+      const w = window.innerWidth;
+      if (w <= 1024) return true;
 
-  React.useEffect(() => {
-    const mqWidth = window.matchMedia("(max-width: 1024px)");
-    const mqCoarse = window.matchMedia("(pointer: coarse)");
+      const coarse =
+        window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 
-    const handler = () => setIsMobile(useMobileApp());
+      return !!coarse;
+    })();
 
-    // modern + fallback
-    mqWidth.addEventListener?.("change", handler);
-    mqCoarse.addEventListener?.("change", handler);
-    mqWidth.addListener?.(handler);
-    mqCoarse.addListener?.(handler);
-
-    return () => {
-      mqWidth.removeEventListener?.("change", handler);
-      mqCoarse.removeEventListener?.("change", handler);
-      mqWidth.removeListener?.(handler);
-      mqCoarse.removeListener?.(handler);
-    };
-  }, []);
-
-  return isMobile ? <AppMobile /> : <App />;
-}
+    root.classList.toggle("ow-mobile", isMobileOrTablet);
+    root.classList.toggle("ow-desktop", !isMobileOrTablet);
+  } catch {
+    // ignore
+  }
+})();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <Root />
+    <App />
   </React.StrictMode>
 );

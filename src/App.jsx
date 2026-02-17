@@ -1,57 +1,45 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 
 import AppDesktop from "./AppDesktop.jsx";
 import AppMobile from "./AppMobile.jsx";
 
-// CSS
-import "./styles/desktop.css";
-import "./styles/mobile.css";
+function computeIsMobileOrTablet() {
+  if (typeof window === "undefined") return false;
 
-/** Re-render App.jsx on EVERY hash change (this is the key fix) */
-function useHash() {
-  const get = () => (typeof window !== "undefined" ? window.location.hash || "#/" : "#/");
+  const w = window.innerWidth;
+  if (w <= 1024) return true;
 
-  const [hash, setHash] = useState(get());
+  const coarse =
+    window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 
-  useEffect(() => {
-    const onHash = () => setHash(get());
-    window.addEventListener("hashchange", onHash);
-
-    // In case something changes hash without triggering (rare), poll once after mount
-    const t = setTimeout(() => setHash(get()), 0);
-
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("hashchange", onHash);
-    };
-  }, []);
-
-  return hash;
+  return !!coarse;
 }
 
 function useIsMobileOrTablet() {
-  const get = () => {
-    if (typeof window === "undefined") return false;
-
-    const w = window.innerWidth;
-    if (w <= 1024) return true;
-
-    const coarse =
-      window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
-
-    return !!coarse;
-  };
-
-  const [isMobileOrTablet, setIsMobileOrTablet] = useState(get());
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(() =>
+    computeIsMobileOrTablet()
+  );
 
   useEffect(() => {
-    const onResize = () => setIsMobileOrTablet(get());
-    window.addEventListener("resize", onResize);
-    window.addEventListener("orientationchange", onResize);
+    const onChange = () => setIsMobileOrTablet(computeIsMobileOrTablet());
+
+    window.addEventListener("resize", onChange);
+    window.addEventListener("orientationchange", onChange);
+
+    let mq;
+    if (window.matchMedia) {
+      mq = window.matchMedia("(pointer: coarse)");
+      if (mq.addEventListener) mq.addEventListener("change", onChange);
+      else if (mq.addListener) mq.addListener(onChange);
+    }
 
     return () => {
-      window.removeEventListener("resize", onResize);
-      window.removeEventListener("orientationchange", onResize);
+      window.removeEventListener("resize", onChange);
+      window.removeEventListener("orientationchange", onChange);
+      if (mq) {
+        if (mq.removeEventListener) mq.removeEventListener("change", onChange);
+        else if (mq.removeListener) mq.removeListener(onChange);
+      }
     };
   }, []);
 
@@ -59,27 +47,14 @@ function useIsMobileOrTablet() {
 }
 
 export default function App() {
-  const hash = useHash();
   const isMobileOrTablet = useIsMobileOrTablet();
 
-  const isAdminRoute = useMemo(() => {
-    // hash looks like "#/admin/dashboard"
-    return (hash || "#/").startsWith("#/admin");
-  }, [hash]);
-
-  // ✅ If admin route => ALWAYS use desktop app
-  const useMobileApp = isMobileOrTablet && !isAdminRoute;
-
-  // Toggle class on <html> for CSS switching
-  useEffect(() => {
+  // ✅ Apply class before paint whenever device state changes
+  useLayoutEffect(() => {
     const root = document.documentElement;
-    root.classList.toggle("ow-mobile", useMobileApp);
-    root.classList.toggle("ow-desktop", !useMobileApp);
-  }, [useMobileApp]);
+    root.classList.toggle("ow-mobile", isMobileOrTablet);
+    root.classList.toggle("ow-desktop", !isMobileOrTablet);
+  }, [isMobileOrTablet]);
 
-  // ✅ Force remount when switching between mobile/desktop/admin states
-  // This prevents "stuck on current page" when React doesn't remount the other tree
-  const appKey = useMobileApp ? `mobile:${hash}` : `desktop:${hash}`;
-
-  return useMobileApp ? <AppMobile key={appKey} /> : <AppDesktop key={appKey} />;
+  return isMobileOrTablet ? <AppMobile /> : <AppDesktop />;
 }
