@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import AppDesktop from "./AppDesktop.jsx";
 import AppMobile from "./AppMobile.jsx";
@@ -7,15 +7,35 @@ import AppMobile from "./AppMobile.jsx";
 import "./styles/desktop.css";
 import "./styles/mobile.css";
 
+/** Re-render App.jsx on EVERY hash change (this is the key fix) */
+function useHash() {
+  const get = () => (typeof window !== "undefined" ? window.location.hash || "#/" : "#/");
+
+  const [hash, setHash] = useState(get());
+
+  useEffect(() => {
+    const onHash = () => setHash(get());
+    window.addEventListener("hashchange", onHash);
+
+    // In case something changes hash without triggering (rare), poll once after mount
+    const t = setTimeout(() => setHash(get()), 0);
+
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("hashchange", onHash);
+    };
+  }, []);
+
+  return hash;
+}
+
 function useIsMobileOrTablet() {
   const get = () => {
     if (typeof window === "undefined") return false;
 
-    // Primary: viewport width
     const w = window.innerWidth;
-    if (w <= 1024) return true; // phones + tablets
+    if (w <= 1024) return true;
 
-    // Secondary: coarse pointer (touch devices)
     const coarse =
       window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 
@@ -38,39 +58,28 @@ function useIsMobileOrTablet() {
   return isMobileOrTablet;
 }
 
-function useIsAdminRoute() {
-  const get = () => {
-    if (typeof window === "undefined") return false;
-    const h = window.location.hash || "#/";
-    return h.startsWith("#/admin");
-  };
-
-  const [isAdmin, setIsAdmin] = useState(get());
-
-  useEffect(() => {
-    const onHash = () => setIsAdmin(get());
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
-
-  return isAdmin;
-}
-
 export default function App() {
+  const hash = useHash();
   const isMobileOrTablet = useIsMobileOrTablet();
-  const isAdminRoute = useIsAdminRoute();
 
-  // If admin route: ALWAYS use Desktop app (because it contains admin pages)
+  const isAdminRoute = useMemo(() => {
+    // hash looks like "#/admin/dashboard"
+    return (hash || "#/").startsWith("#/admin");
+  }, [hash]);
+
+  // ✅ If admin route => ALWAYS use desktop app
   const useMobileApp = isMobileOrTablet && !isAdminRoute;
 
-  // Toggle a class on <html> so CSS can switch cleanly
+  // Toggle class on <html> for CSS switching
   useEffect(() => {
     const root = document.documentElement;
-
-    // If admin route we force desktop class to avoid “mobile css hiding admin”
     root.classList.toggle("ow-mobile", useMobileApp);
     root.classList.toggle("ow-desktop", !useMobileApp);
   }, [useMobileApp]);
 
-  return useMobileApp ? <AppMobile /> : <AppDesktop />;
+  // ✅ Force remount when switching between mobile/desktop/admin states
+  // This prevents "stuck on current page" when React doesn't remount the other tree
+  const appKey = useMobileApp ? `mobile:${hash}` : `desktop:${hash}`;
+
+  return useMobileApp ? <AppMobile key={appKey} /> : <AppDesktop key={appKey} />;
 }
