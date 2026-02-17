@@ -14,7 +14,7 @@ import bgHome from "./assets/backgrounds/home.jpg";
 import bgYoga from "./assets/backgrounds/yoga.jpg";
 import bgEducation from "./assets/backgrounds/education.jpg";
 import bgWellness from "./assets/backgrounds/wellness.jpg";
-
+import cx from "./utils/cx";
 const BACKGROUNDS = {
   home: bgHome,
   yoga: bgYoga,
