@@ -1,11 +1,9 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
-
+// src/App.jsx
+import React, { useEffect, useState } from "react";
 import AppDesktop from "./AppDesktop.jsx";
 import AppMobile from "./AppMobile.jsx";
 
-function computeIsMobileOrTablet() {
-  if (typeof window === "undefined") return false;
-
+function isMobileOrTablet() {
   const w = window.innerWidth;
   if (w <= 1024) return true;
 
@@ -15,46 +13,17 @@ function computeIsMobileOrTablet() {
   return !!coarse;
 }
 
-function useIsMobileOrTablet() {
-  const [isMobileOrTablet, setIsMobileOrTablet] = useState(() =>
-    computeIsMobileOrTablet()
-  );
+export default function App() {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return isMobileOrTablet();
+  });
 
   useEffect(() => {
-    const onChange = () => setIsMobileOrTablet(computeIsMobileOrTablet());
-
-    window.addEventListener("resize", onChange);
-    window.addEventListener("orientationchange", onChange);
-
-    let mq;
-    if (window.matchMedia) {
-      mq = window.matchMedia("(pointer: coarse)");
-      if (mq.addEventListener) mq.addEventListener("change", onChange);
-      else if (mq.addListener) mq.addListener(onChange);
-    }
-
-    return () => {
-      window.removeEventListener("resize", onChange);
-      window.removeEventListener("orientationchange", onChange);
-      if (mq) {
-        if (mq.removeEventListener) mq.removeEventListener("change", onChange);
-        else if (mq.removeListener) mq.removeListener(onChange);
-      }
-    };
+    const onResize = () => setIsMobile(isMobileOrTablet());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  return isMobileOrTablet;
-}
-
-export default function App() {
-  const isMobileOrTablet = useIsMobileOrTablet();
-
-  // ✅ Apply class before paint whenever device state changes
-  useLayoutEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("ow-mobile", isMobileOrTablet);
-    root.classList.toggle("ow-desktop", !isMobileOrTablet);
-  }, [isMobileOrTablet]);
-
-  return isMobileOrTablet ? <AppMobile /> : <AppDesktop />;
+  return isMobile ? <AppMobile /> : <AppDesktop />;
 }

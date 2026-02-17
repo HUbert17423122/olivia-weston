@@ -18,16 +18,14 @@ import bgHome from "./assets/backgrounds/home.jpg";
 import bgYoga from "./assets/backgrounds/yoga.jpg";
 import bgEducation from "./assets/backgrounds/education.jpg";
 import bgWellness from "./assets/backgrounds/wellness.jpg";
-
+import cx from "./utils/cx";
 /* ================= CONFIG ================= */
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080/api";
 
 /* ================= GLOBAL CARD LINE (use same grey everywhere) ================= */
 const CARD_LINE = "from-[#aab3c2] via-[#8e97a6] to-[#737d8a]";
 
-function cx(...xs) {
-  return xs.filter(Boolean).join(" ");
-}
+
 
 /* ================= BUTTON ================= */
 function Button({ children, className = "", variant, ...props }) {

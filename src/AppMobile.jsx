@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import cx from "./utils/cx";
 // ✅ Import shared content from desktop (real source of truth)
 import {
   I18N,
@@ -14,7 +14,7 @@ import bgHome from "./assets/backgrounds/home.jpg";
 import bgYoga from "./assets/backgrounds/yoga.jpg";
 import bgEducation from "./assets/backgrounds/education.jpg";
 import bgWellness from "./assets/backgrounds/wellness.jpg";
-import cx from "./utils/cx";
+
 const BACKGROUNDS = {
   home: bgHome,
   yoga: bgYoga,
@@ -275,7 +275,7 @@ function MobileShell({ dark, onToggleDark, lang, onToggleLang, t, children }) {
     </div>
   );
 }
-
+const CARD_LINE = "from-[#8fb8ae] via-[#7aa89f] to-[#6b988f]";
 /* ================= REUSABLE CARD ================= */
 function MobileCard({ dark, children, accentLine = true }) {
   return (
