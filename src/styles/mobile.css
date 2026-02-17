@@ -2,7 +2,6 @@
    OLIVIA WESTON — MOBILE/TABLET PREMIUM OVERRIDES
    Scope: only when App.jsx toggles <html class="ow-mobile">
    ========================================================= */
-html.ow-mobile body { outline: 6px solid red !important; }
 html.ow-mobile,
 html.ow-mobile body {
   -webkit-text-size-adjust: 100%;
